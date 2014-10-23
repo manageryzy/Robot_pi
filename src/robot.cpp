@@ -36,7 +36,11 @@ int main(int argc, char** argv )
 		img_canny =cvCreateImage(cvGetSize(img),img->depth,1);
 		cvCvtColor(img,img_gray,CV_RGB2GRAY);
 		cvCanny(img_gray,img_canny,30,50,3);
+
+#ifdef SHOW_GUI
 		cvShowImage ("capture", img_canny);
+#endif
+
 		cvReleaseImage(&img);
 		cvReleaseImage(&img_gray);
 		cvReleaseImage(&img_canny);
@@ -49,8 +53,9 @@ int main(int argc, char** argv )
 	delete sequencer;
 
 	//cvReleaseImage(&filterMask);
-
+#ifdef SHOW_GUI
 	cvDestroyWindow("capture");
+#endif
 	
 	return 0;
 }
