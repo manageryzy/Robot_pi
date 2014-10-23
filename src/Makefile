@@ -76,7 +76,7 @@ robot:	serialOut.o confReader.o robot.o opencv.o
 
 clean:
 	@echo "[Clean]"
-	@rm -f $(OBJ) *~ core tags $(BINS)
+	@rm -f *.o 
 
 tags:	$(SRC)
 	@echo [ctags]

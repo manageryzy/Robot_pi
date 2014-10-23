@@ -10,9 +10,12 @@
 
 int main(int argc, char** argv )
 {
+	int dropFrames=0;
 	IplImage *img,*img_gray,*img_canny;
 
 	ASDFrameSequencer *sequencer;
+	
+	cvStartWindowThread();
 	
 	//img_gray=cvCreateImage(cvSize(320,280),IPL_DEPTH_16U,1);
 	
@@ -32,6 +35,14 @@ int main(int argc, char** argv )
 	
 	while ((img = sequencer->getNextImage()) != 0)
 	{
+		if(dropFrames++%5!=0)
+		{
+			continue;
+		}
+		else
+		{
+			dropFrames = 1;
+		}
 		img_gray=cvCloneImage(img);
 		img_gray=cvCreateImage(cvGetSize(img),img->depth,1);
 		img_canny =cvCreateImage(cvGetSize(img),img->depth,1);
@@ -45,7 +56,9 @@ int main(int argc, char** argv )
 		cvReleaseImage(&img);
 		cvReleaseImage(&img_gray);
 		cvReleaseImage(&img_canny);
-		sleep(5000);
+		puts("before sleep");
+		sleep(1);
+		puts("after sleep");
 		if (cvWaitKey(1) == 27)
 			break;
 	}
