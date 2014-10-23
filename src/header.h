@@ -8,4 +8,5 @@
 	#include <map>
 	#include <string>
 	#define __INCLUDED__
+	#define SHOW_GUI
 #endif

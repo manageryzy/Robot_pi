@@ -5,6 +5,7 @@
 #include "serialOut.h"
 #include "opencv.h"
 #include "confReader.h"
+#include <pthread.h>
 
 
 int main(int argc, char** argv )
@@ -18,13 +19,15 @@ int main(int argc, char** argv )
 	sequencer = new ASDFrameSequencerWebCam();
         (dynamic_cast<ASDFrameSequencerWebCam*>(sequencer))->open(-1);
 
-        if (! sequencer->isOpen())
-        {
-		std::cout << std::endl << "Error: Cannot initialize the default Webcam" << std::endl << std::endl;
-		return -1;
-        }
-	
+	if (! sequencer->isOpen())
+	{
+	std::cout << std::endl << "Error: Cannot initialize the default Webcam" << std::endl << std::endl;
+	return -1;
+	}
+
+#ifdef SHOW_GUI
 	cvNamedWindow("capture", CV_WINDOW_AUTOSIZE);
+#endif
 	
 	while ((img = sequencer->getNextImage()) != 0)
 	{
@@ -37,6 +40,7 @@ int main(int argc, char** argv )
 		cvReleaseImage(&img);
 		cvReleaseImage(&img_gray);
 		cvReleaseImage(&img_canny);
+		sleep(5000);
 		if (cvWaitKey(1) == 27)
 			break;
 	}
