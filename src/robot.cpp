@@ -27,6 +27,7 @@ int main(int argc, char** argv )
 
 #ifdef SHOW_GUI
 	cvNamedWindow("capture", CV_WINDOW_AUTOSIZE);
+	puts("created window capture");
 #endif
 	
 	while ((img = sequencer->getNextImage()) != 0)
@@ -55,6 +56,7 @@ int main(int argc, char** argv )
 	//cvReleaseImage(&filterMask);
 #ifdef SHOW_GUI
 	cvDestroyWindow("capture");
+	puts("destroied window capture");
 #endif
 	
 	return 0;
