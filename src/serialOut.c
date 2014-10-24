@@ -28,9 +28,11 @@
 #include "serialOut.h"
 #include "confReader.h"
 
+int fd ;
+
 int SerialInit()
 {
-  int fd ;
+
   int count ;
   unsigned int nextTime ;
 
@@ -46,9 +48,18 @@ int SerialInit()
     return 1 ;
   }
 
-  serialPuts (fd,"#13 P1500 T1000\r\n");
+  //serialPuts (fd,"#13 P1500 T1000\r\n");
 
-  serialClose(fd);
-  printf ("\n") ;
   return 0 ;
+}
+
+void closeSerial()
+{
+	serialClose(fd);
+	printf("serial has been closed!\n");
+}
+
+void sreialSendString(const char * src)
+{
+	serialPuts(fd,src);
 }

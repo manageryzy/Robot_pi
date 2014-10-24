@@ -69,3 +69,7 @@ public:
     virtual void close();
     virtual bool isOpen();
 };
+
+
+int opencvCaptureInit();
+IplImage * myCaptureImage();

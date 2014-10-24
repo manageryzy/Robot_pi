@@ -1,4 +1,4 @@
-#include "opencv.h"
+#include "opencvCapture.h"
 
 #ifndef _CRT_SECURE_NO_WARNINGS
 # define _CRT_SECURE_NO_WARNINGS
@@ -177,4 +177,48 @@ void ASDFrameSequencerImageFile::close()
 bool ASDFrameSequencerImageFile::isOpen()
 {
     return (nCurrentIndex <= nEndIndex);
+}
+
+//----------------------------------------------------------
+//上面的是库里面的文件，下面的是自定义的。或许写成一个类更好，但是懒得改了
+ASDFrameSequencer *sequencer;
+
+//初始化
+int opencvCaptureInit()
+{
+	//img_gray=cvCreateImage(cvSize(320,280),IPL_DEPTH_16U,1);
+
+	sequencer = new ASDFrameSequencerWebCam();
+		(dynamic_cast<ASDFrameSequencerWebCam*>(sequencer))->open(-1);
+
+	if (! sequencer->isOpen())
+	{
+		std::cout << std::endl << "Error: Cannot initialize the default Webcam" << std::endl << std::endl;
+		return -1;
+	}
+
+	return 0;
+}
+
+//捕获图像，并且丢弃掉一定数量的数据
+IplImage * myCaptureImage()
+{
+	int dropFrames=0;
+	IplImage *img;
+
+	while ((img = sequencer->getNextImage()) != 0)
+	{
+		if(dropFrames++<=6)
+		{
+			continue;
+		}
+		return img;
+	}
+}
+
+//释放资源
+void opencvCaptureClose()
+{
+	sequencer->close();
+	delete sequencer;
 }
