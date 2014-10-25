@@ -91,6 +91,7 @@ int main(int argc, char** argv )
 			#ifdef CAPTURE_FROM_WEBCAM
 				img = myCaptureImage();
 			#else
+				puts(ImageFileName.c_str());
 				img = cvLoadImage(ImageFileName.c_str(),-1);
 			#endif
 
