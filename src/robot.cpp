@@ -71,6 +71,7 @@ int main(int argc, char** argv )
 
 	IplImage *img, //原始图像
 		*img_gray, //灰度图像
+		*img_smooth,//滤波图像
 		*img_canny; //canny 检测之后的图像
 
 	if(init()!=0)
@@ -109,6 +110,11 @@ int main(int argc, char** argv )
 				puts("cvCvtColor(img,img_gray,CV_RGB2GRAY);");
 			#endif
 
+			cvSmooth(img_gray,img_smooth);
+			#ifdef __DEBUG__
+				puts("cvSmooth(img_gray,img_smooth);");
+			#endif
+
 			cvCanny(img_gray,img_canny,30,50,3);
 			#ifdef __DEBUG__
 				puts("cvCanny(img_gray,img_canny,30,50,3);");
@@ -123,6 +129,7 @@ int main(int argc, char** argv )
 
 			cvReleaseImage(&img);
 			cvReleaseImage(&img_gray);
+			cvReleaseImage(&img_smooth);
 			cvReleaseImage(&img_canny);
 		}
 
