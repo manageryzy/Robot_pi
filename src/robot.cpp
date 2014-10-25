@@ -71,6 +71,7 @@ int main(int argc, char** argv )
 
 	IplImage *img, //原始图像
 		*img_gray, //灰度图像
+		*img_smooth,//滤波图像
 		*img_canny; //canny 检测之后的图像
 
 	if(init()!=0)
@@ -83,37 +84,69 @@ int main(int argc, char** argv )
 		if(shouldCaptule)
 		{
 			shouldCaptule = false;
-			img = myCaptureImage();
+
+			#ifdef CAPTURE_FROM_WEBCAM
+				img = myCaptureImage();
+			#else
+				img = cvLoadImage("./data/1.jpg",-1);
+			#endif
 
 			#ifdef __DEBUG__
 				puts("captured!");
 			#endif
 
-			img_gray=cvCloneImage(img);
-			#ifdef __DEBUG__
-				puts("img_gray=cvCloneImage(img);");
-			#endif
+//			img_gray=cvCloneImage(img);
+//			#ifdef __DEBUG__
+//				puts("img_gray=cvCloneImage(img);");
+//			#endif
 
+			//--------------------------
+			//图像灰度化
+
+			//创建灰度图像
 			img_gray=cvCreateImage(cvGetSize(img),img->depth,1);
 			#ifdef __DEBUG__
 				puts("img_gray=cvCreateImage(cvGetSize(img),img->depth,1);");
 			#endif
 
-			img_canny =cvCreateImage(cvGetSize(img),img->depth,1);
-			#ifdef __DEBUG__
-				puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
-			#endif
-
+			//色彩空间转换
 			cvCvtColor(img,img_gray,CV_RGB2GRAY);
 			#ifdef __DEBUG__
 				puts("cvCvtColor(img,img_gray,CV_RGB2GRAY);");
 			#endif
 
+			//---------------------------
+			//平滑滤波
+
+			//创建smooth的图像
+			img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);
+			#ifdef __DEBUG__
+				puts("img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);");
+			#endif
+
+			//进行平滑滤波
+			cvSmooth(img_gray,img_smooth);
+			#ifdef __DEBUG__
+				puts("cvSmooth(img_gray,img_smooth);");
+			#endif
+
+			//----------------------------
+			//canny 变换
+
+			//创建canny变换的图像
+			img_canny =cvCreateImage(cvGetSize(img),img->depth,1);
+			#ifdef __DEBUG__
+				puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
+			#endif
+
+			//进行变换
 			cvCanny(img_gray,img_canny,30,50,3);
 			#ifdef __DEBUG__
 				puts("cvCanny(img_gray,img_canny,30,50,3);");
 			#endif
 
+			//-----------------------------
+			//显示图像
 			#ifdef SHOW_GUI
 				#ifdef __DEBUG__
 					puts("show captured!");
@@ -121,8 +154,11 @@ int main(int argc, char** argv )
 				cvShowImage ("capture", img_canny);
 			#endif
 
+			//-----------------------------
+			//垃圾回收
 			cvReleaseImage(&img);
 			cvReleaseImage(&img_gray);
+			cvReleaseImage(&img_smooth);
 			cvReleaseImage(&img_canny);
 		}
 
