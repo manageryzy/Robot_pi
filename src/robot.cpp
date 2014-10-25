@@ -13,6 +13,7 @@ bool shouldCaptule = false,
 	shouldExit = false;
 
 string ImageFileName;
+int ImageFilterSize=3;
 
 /**
  * 初始化
@@ -21,6 +22,7 @@ int init()
 {
 	confReader RobotConfReader("./conf/robot.conf");
 	ImageFileName = RobotConfReader.getConf("image_location");
+	ImageFilterSize = std::atoi( RobotConfReader.getConf("image_filter_size").c_str());
 
 	if(SerialInit()!=0)
 	{
@@ -129,7 +131,7 @@ int main(int argc, char** argv )
 			#endif
 
 			//进行平滑滤波
-			cvSmooth(img_gray,img_smooth);
+			cvSmooth(img_gray,img_smooth,CV_GAUSSIAN,ImageFilterSize,0,0,0);
 			#ifdef __DEBUG__
 				puts("cvSmooth(img_gray,img_smooth);");
 			#endif
