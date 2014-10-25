@@ -12,12 +12,15 @@
 bool shouldCaptule = false,
 	shouldExit = false;
 
+string ImageFileName;
+
 /**
  * 初始化
  */
 int init()
 {
 	confReader RobotConfReader("./conf/robot.conf");
+	ImageFileName = RobotConfReader.getConf("image_location");
 
 	if(SerialInit()!=0)
 	{
@@ -88,7 +91,7 @@ int main(int argc, char** argv )
 			#ifdef CAPTURE_FROM_WEBCAM
 				img = myCaptureImage();
 			#else
-				img = cvLoadImage("./data/1.jpg",-1);
+				img = cvLoadImage(ImageFileName.c_str(),-1);
 			#endif
 
 			#ifdef __DEBUG__

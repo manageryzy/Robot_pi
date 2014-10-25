@@ -10,5 +10,5 @@
 	#define __INCLUDED__
 	#define SHOW_GUI
 	#define __DEBUG__
-	#define CAPTURE_FROM_WEBCAM
+	//#define CAPTURE_FROM_WEBCAM
 #endif
