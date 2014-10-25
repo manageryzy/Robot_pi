@@ -9,7 +9,7 @@ confReader::confReader(const char * fileName)
 	fp =  fopen(fileName,"r");
 	if(fp!=NULL)
 	{
-		while(!fgets(fileReadBuffer,sizeof(fileReadBuffer),fp)||ferror(fp)||feof(fp))
+		while(fgets(fileReadBuffer,sizeof(fileReadBuffer),fp)!=fileReadBuffer)
 		{
 			if(fileReadBuffer[0]=='#')
 				continue;
@@ -22,8 +22,18 @@ confReader::confReader(const char * fileName)
 			ItemName = new string(confItemName);
 			ItemValue = new string(confItemValue);
 			
+			#ifdef __DEBUG__
+				puts(ItemName->c_str());
+				puts(ItemValue->c_str());
+			#endif
+
 			conf.insert(pair<string,string>(*ItemName,*ItemValue));
 		}
+		puts("finish reading configure file!");
+	}
+	else
+	{
+		puts("error in reading configure file!");
 	}
 }
 
