@@ -9,8 +9,13 @@ confReader::confReader(const char * fileName)
 	fp =  fopen(fileName,"r");
 	if(fp!=NULL)
 	{
-		while(fgets(fileReadBuffer,sizeof(fileReadBuffer),fp)!=fileReadBuffer)
+		puts("start to read configure file");
+		while(fgets(fileReadBuffer,sizeof(fileReadBuffer),fp)==fileReadBuffer)
 		{
+			#ifdef __DEBUG__
+				puts(fileReadBuffer);
+			#endif
+
 			if(fileReadBuffer[0]=='#')
 				continue;
 			if(sscanf(fileReadBuffer,"%s %s",confItemName,confItemValue)==EOF)
@@ -33,7 +38,7 @@ confReader::confReader(const char * fileName)
 	}
 	else
 	{
-		puts("error in reading configure file!");
+		puts("error in reading configure file!\ncan't open file!");
 	}
 }
 
