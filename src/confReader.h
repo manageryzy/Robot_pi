@@ -6,7 +6,7 @@ class confReader{
 	map<string,string> conf;
 	FILE * fp;
 public :
-	confReader(char * fileName);
+	confReader(const char * fileName);
 	string getConf(string item);
 	
 };

@@ -9,4 +9,5 @@
 	#include <string>
 	#define __INCLUDED__
 	#define SHOW_GUI
+	#define __DEBUG__
 #endif

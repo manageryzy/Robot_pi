@@ -1,6 +1,6 @@
 #include "confReader.h"
 
-confReader::confReader(char * fileName)
+confReader::confReader(const char * fileName)
 {
 	char confItemName[256];
 	char confItemValue[1024];

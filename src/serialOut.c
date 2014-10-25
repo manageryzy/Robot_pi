@@ -26,33 +26,30 @@
 #include <wiringSerial.h>
 
 #include "serialOut.h"
-#include "confReader.h"
 
 int fd ;
 
+//初始化串口
 int SerialInit()
 {
+	if ((fd = serialOpen ("/dev/ttyAMA0", 115200)) < 0)
+	{
+		fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
+		return 1 ;
+	}
 
-  int count ;
-  unsigned int nextTime ;
+	if (wiringPiSetup () == -1)
+	{
+		fprintf (stdout, "Unable to start wiringPi: %s\n", strerror (errno)) ;
+		return 1 ;
+	}
 
-  if ((fd = serialOpen ("/dev/ttyAMA0", 115200)) < 0)
-  {
-    fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
-    return 1 ;
-  }
+	//serialPuts (fd,"#13 P1500 T1000\r\n");
 
-  if (wiringPiSetup () == -1)
-  {
-    fprintf (stdout, "Unable to start wiringPi: %s\n", strerror (errno)) ;
-    return 1 ;
-  }
-
-  //serialPuts (fd,"#13 P1500 T1000\r\n");
-
-  return 0 ;
+	return 0 ;
 }
 
+//关闭串口
 void closeSerial()
 {
 	serialClose(fd);

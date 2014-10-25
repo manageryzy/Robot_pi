@@ -73,3 +73,4 @@ public:
 
 int opencvCaptureInit();
 IplImage * myCaptureImage();
+void opencvCaptureClose();

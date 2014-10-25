@@ -60,14 +60,14 @@ robot.o:robot.cpp robot.h header.h
 	@echo now complecting robot
 	@$(CC) -c -ggdb `pkg-config --cflags opencv` robot.cpp -o robot.o 
 	
-opencv.o:opencv.cpp 
-	@echo now complecting opencv
-	@$(CC) -c  -ggdb `pkg-config --cflags opencv` opencv.cpp -o opencv.o
+opencvCapture.o:opencvCapture.cpp opencvCapture.h header.h
+	@echo now complecting opencvCapture
+	@$(CC) -c  -ggdb `pkg-config --cflags opencv` opencvCapture.cpp -o opencvCapture.o
 
 
-robot:	serialOut.o confReader.o robot.o opencv.o
+robot:	serialOut.o confReader.o robot.o opencvCapture.o
 	@echo [link]
-	@$(CC) -o $@ serialOut.o confReader.o opencv.o robot.o $(LDFLAGS) $(LDLIBS)  `pkg-config --libs opencv`
+	@$(CC) -o $@ serialOut.o confReader.o opencvCapture.o robot.o $(LDFLAGS) $(LDLIBS)  `pkg-config --libs opencv`
 	@cp robot ../robot
 
 .c.o:

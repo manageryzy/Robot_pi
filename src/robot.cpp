@@ -17,6 +17,8 @@ bool shouldCaptule = false,
  */
 int init()
 {
+	confReader RobotConfReader("./conf/robot.conf");
+
 	if(SerialInit()!=0)
 	{
 		puts("error in init serial!Quit..");
@@ -74,6 +76,8 @@ int main(int argc, char** argv )
 	if(init()!=0)
 		exit(-1);
 
+	puts("init finished!");
+
 	while (1)
 	{
 		if(shouldCaptule)
@@ -81,15 +85,41 @@ int main(int argc, char** argv )
 			shouldCaptule = false;
 			img = myCaptureImage();
 
-			#ifdef SHOW_GUI
-				cvShowImage ("capture", img_canny);
+			#ifdef __DEBUG__
+				puts("captured!");
 			#endif
 
 			img_gray=cvCloneImage(img);
+			#ifdef __DEBUG__
+				puts("img_gray=cvCloneImage(img);");
+			#endif
+
 			img_gray=cvCreateImage(cvGetSize(img),img->depth,1);
+			#ifdef __DEBUG__
+				puts("img_gray=cvCreateImage(cvGetSize(img),img->depth,1);");
+			#endif
+
 			img_canny =cvCreateImage(cvGetSize(img),img->depth,1);
+			#ifdef __DEBUG__
+				puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
+			#endif
+
 			cvCvtColor(img,img_gray,CV_RGB2GRAY);
+			#ifdef __DEBUG__
+				puts("cvCvtColor(img,img_gray,CV_RGB2GRAY);");
+			#endif
+
 			cvCanny(img_gray,img_canny,30,50,3);
+			#ifdef __DEBUG__
+				puts("cvCanny(img_gray,img_canny,30,50,3);");
+			#endif
+
+			#ifdef SHOW_GUI
+				#ifdef __DEBUG__
+					puts("show captured!");
+				#endif
+				cvShowImage ("capture", img_canny);
+			#endif
 
 			cvReleaseImage(&img);
 			cvReleaseImage(&img_gray);
@@ -103,6 +133,8 @@ int main(int argc, char** argv )
 		if (cvWaitKey(1) == 27 || shouldExit)
 			break;
 	}
+
+	puts("quit!");
 
 	release();
 
