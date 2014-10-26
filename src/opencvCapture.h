@@ -74,3 +74,4 @@ public:
 int opencvCaptureInit();
 IplImage * myCaptureImage();
 void opencvCaptureClose();
+int otsu(const IplImage *src_image); //大津法求阈值

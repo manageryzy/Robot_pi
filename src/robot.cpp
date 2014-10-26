@@ -91,6 +91,7 @@ int main(int argc, char** argv )
 	IplImage *img, //原始图像
 		*img_gray, //灰度图像
 		*img_smooth,//滤波图像
+		*img_twovalue,//二值化图像
 		*img_canny; //canny 检测之后的图像
 
 	if(init()!=0)
@@ -122,48 +123,68 @@ int main(int argc, char** argv )
 
 			//--------------------------
 			//图像灰度化
+			{
+				//创建灰度图像
+				img_gray=cvCreateImage(cvGetSize(img),img->depth,1);
+				#ifdef __DEBUG__
+					puts("img_gray=cvCreateImage(cvGetSize(img),img->depth,1);");
+				#endif
 
-			//创建灰度图像
-			img_gray=cvCreateImage(cvGetSize(img),img->depth,1);
-			#ifdef __DEBUG__
-				puts("img_gray=cvCreateImage(cvGetSize(img),img->depth,1);");
-			#endif
-
-			//色彩空间转换
-			cvCvtColor(img,img_gray,CV_RGB2GRAY);
-			#ifdef __DEBUG__
-				puts("cvCvtColor(img,img_gray,CV_RGB2GRAY);");
-			#endif
+				//色彩空间转换
+				cvCvtColor(img,img_gray,CV_RGB2GRAY);
+				#ifdef __DEBUG__
+					puts("cvCvtColor(img,img_gray,CV_RGB2GRAY);");
+				#endif
+			}
 
 			//---------------------------
 			//平滑滤波
+			{
+				//创建smooth的图像
+				img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);
+				#ifdef __DEBUG__
+					puts("img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);");
+				#endif
 
-			//创建smooth的图像
-			img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);
-			#ifdef __DEBUG__
-				puts("img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);");
-			#endif
+				//进行平滑滤波
+				cvSmooth(img_gray,img_smooth,CV_GAUSSIAN,ImageFilterSize,0,0,0);
+				#ifdef __DEBUG__
+					puts("cvSmooth(img_gray,img_smooth);");
+				#endif
+			}
 
-			//进行平滑滤波
-			cvSmooth(img_gray,img_smooth,CV_GAUSSIAN,ImageFilterSize,0,0,0);
-			#ifdef __DEBUG__
-				puts("cvSmooth(img_gray,img_smooth);");
-			#endif
+			//---------------------------
+			//二值化
+			{
+				//创建二值化图像
+				img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);
+				#ifdef __DEBUG__
+					puts("img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);");
+				#endif
+
+				int autoOstu = otsu(img_gray);
+				#ifdef __DEBUG__
+					puts("int autoOstu = otsu(img_gray);");
+				#endif
+
+				cvThreshold(img_smooth,img_twovalue,100,150,CV_THRESH_BINARY);
+			}
 
 			//----------------------------
 			//canny 变换
+			{
+				//创建canny变换的图像
+				img_canny = cvCreateImage(cvGetSize(img),img->depth,1);
+				#ifdef __DEBUG__
+					puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
+				#endif
 
-			//创建canny变换的图像
-			img_canny =cvCreateImage(cvGetSize(img),img->depth,1);
-			#ifdef __DEBUG__
-				puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
-			#endif
-
-			//进行变换
-			cvCanny(img_gray,img_canny,30,50,3);
-			#ifdef __DEBUG__
-				puts("cvCanny(img_gray,img_canny,30,50,3);");
-			#endif
+				//进行变换
+				cvCanny(img_gray,img_canny,30,50,3);
+				#ifdef __DEBUG__
+					puts("cvCanny(img_gray,img_canny,30,50,3);");
+				#endif
+			}
 
 			//-----------------------------
 			//显示图像
@@ -171,7 +192,7 @@ int main(int argc, char** argv )
 				#ifdef __DEBUG__
 					puts("show captured!");
 				#endif
-				cvShowImage ("capture", img_smooth);
+				cvShowImage ("capture", img_twovalue);
 			#endif
 
 			//-----------------------------
@@ -179,6 +200,7 @@ int main(int argc, char** argv )
 			cvReleaseImage(&img);
 			cvReleaseImage(&img_gray);
 			cvReleaseImage(&img_smooth);
+			cvReleaseImage(&img_twovalue);
 			cvReleaseImage(&img_canny);
 		}
 
