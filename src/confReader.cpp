@@ -13,14 +13,17 @@ confReader::confReader(const char * fileName)
 		while(fgets(fileReadBuffer,sizeof(fileReadBuffer),fp)==fileReadBuffer)
 		{
 			#ifdef __DEBUG__
+				puts("line readed:");
 				puts(fileReadBuffer);
 			#endif
 
 			if(fileReadBuffer[0]=='#')
 				continue;
+
+
 			if(sscanf(fileReadBuffer,"%s %s",confItemName,confItemValue)==EOF)
 			{
-				puts("Some thing error while reading config file!");
+				puts("Some thing error while reading config file!May be this is NULL line");
 				continue;
 			}
 			
@@ -28,7 +31,9 @@ confReader::confReader(const char * fileName)
 			ItemValue = new string(confItemValue);
 			
 			#ifdef __DEBUG__
+				puts("Item Name Got:");
 				puts(ItemName->c_str());
+				puts("Item Value Got:");
 				puts(ItemValue->c_str());
 			#endif
 
