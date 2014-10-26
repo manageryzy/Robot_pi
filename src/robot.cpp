@@ -51,8 +51,11 @@ int init()
 
 	//------------------------------
 	//读取步态文件
+	puts("------------------------------");
+	puts("now loading step file!\n");
 
 	//启动步伐
+	puts("loading step file 'go'");
 	robotGoFileName = RobotConfReader.getConf("go");
 	if(robotGoFileName=="null")
 	{
@@ -68,6 +71,7 @@ int init()
 	puts("step file :'go' loaded");
 
 	//行走步伐
+	puts("loading step file 'walk'");
 	robotWalkFileName = RobotConfReader.getConf("walk");
 	if(robotWalkFileName=="null")
 	{
@@ -83,6 +87,7 @@ int init()
 	puts("step file :'walk' loaded");
 
 	//左转步态
+	puts("loading step file 'left'");
 	robotLeftFileName = RobotConfReader.getConf("left");
 	if(robotLeftFileName=="null")
 	{
@@ -98,6 +103,7 @@ int init()
 	puts("step file :'left' loaded");
 
 	//右转步态
+	puts("loading step file 'right'");
 	robotRightFileName = RobotConfReader.getConf("right");
 	if(robotRightFileName=="null")
 	{
@@ -113,6 +119,7 @@ int init()
 	puts("step file :'right' loaded");
 
 	//停止步态
+	puts("loading step file 'stop'");
 	robotStopFileName = RobotConfReader.getConf("stop");
 	if(robotStopFileName=="null")
 	{
