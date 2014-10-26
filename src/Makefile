@@ -62,7 +62,7 @@ robot.o:robot.cpp robot.h header.h
 	
 opencvCapture.o:opencvCapture.cpp opencvCapture.h header.h
 	@echo now complecting opencvCapture
-	@$(CC) -c  -ggdb `pkg-config --cflags opencv` opencvCapture.cpp -o opencvCapture.o
+	@$(CC) -c  -ggdb `pkg-config --cflags opencv` `pkg-config --cflags tinyxml` opencvCapture.cpp -o opencvCapture.o
 
 
 robot:	serialOut.o confReader.o robot.o opencvCapture.o

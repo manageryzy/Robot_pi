@@ -65,12 +65,7 @@ int init()
 		puts("error in getting stand step");
 		return 1;
 	}
-	if(!robotStand.LoadFile(robotStandFileName.c_str()))
-	{
-		puts("error loading stand step");
-		return 1;
-	}
-	actions[ACTION_STAND]=new robotAction(robotStand);
+	actions[ACTION_STAND]=new robotAction(robotStandFileName);
 	puts("step file :stand loaded!");
 
 	//启动步伐
@@ -81,12 +76,7 @@ int init()
 		puts("error in getting go step");
 		return 1;
 	}
-	if(!robotWalk.LoadFile(robotGoFileName.c_str()))
-	{
-		puts("error in loading go step!");
-		return 1;
-	}
-	actions[ACTION_FIRST_STEP] = new robotAction(robotGo);
+	actions[ACTION_FIRST_STEP] = new robotAction(robotGoFileName);
 	puts("step file :'go' loaded");
 
 	//行走步伐
@@ -97,12 +87,7 @@ int init()
 		puts("error in getting walk step");
 		return 1;
 	}
-	if(!robotWalk.LoadFile(robotWalkFileName.c_str()))
-	{
-		puts("error in loading walk step!");
-		return 1;
-	}
-	actions[ACTION_WALK] = new robotAction(robotWalk);
+	actions[ACTION_WALK] = new robotAction(robotWalkFileName);
 	puts("step file :'walk' loaded");
 
 	//左转步态
@@ -113,12 +98,7 @@ int init()
 		puts("error in getting left step");
 		return 1;
 	}
-	if(!robotLeft.LoadFile(robotLeftFileName.c_str()))
-	{
-		puts("error in loading walk step!");
-		return 1;
-	}
-	actions[ACTION_LEFT] = new robotAction(robotLeft);
+	actions[ACTION_LEFT] = new robotAction(robotLeftFileName);
 	puts("step file :'left' loaded");
 
 	//右转步态
@@ -129,12 +109,7 @@ int init()
 		puts("error in getting right step");
 		return 1;
 	}
-	if(!robotRight.LoadFile(robotRightFileName.c_str()))
-	{
-		puts("error in loading right step");
-		return 1;
-	}
-	actions[ACTION_RIGHT] = new robotAction(robotRight);
+	actions[ACTION_RIGHT] = new robotAction(robotRightFileName);
 	puts("step file :'right' loaded");
 
 	//停止步态
@@ -145,12 +120,7 @@ int init()
 		puts("error in getting stop step");
 		return 1;
 	}
-	if(!robotStop.LoadFile(robotStopFileName.c_str()))
-	{
-		puts("error in loading stop step");
-		return 1;
-	}
-	actions[ACTION_STOP] = new robotAction(robotStop);
+	actions[ACTION_STOP] = new robotAction(robotStopFileName);
 	puts("step file :'stop' loaded");
 	puts("\nAll the step file has been loaded successfully!\n");
 
@@ -360,19 +330,23 @@ void robotAction::reset()
 	this->it = this->nodeList.begin();
 }
 
-robotAction::robotAction(TiXmlDocument doc)
+robotAction::robotAction(string doc)
 {
 	it = nodeList.begin();
 	isActive = false;
 	isAutoCycle = false;
-	TiXmlDocument docDom = *doc;
-	TiXmlElement root= docDom.RootElement();
+	TiXmlDocument docDom;
+	if(!docDom.LoadFile(doc.c_str()))
+	{
+		puts("error in reading xml file!");
+	}
 
-	for( TiXmlNode*  item = root.FirstChild();
+	TiXmlElement * root= docDom.RootElement();
+
+	for( TiXmlNode*  item = root->FirstChild("Table1");
 	         item;
 	         item = item->NextSibling() ) {
 		robotActionNode node;
-
 		TiXmlNode * nowNode = item->FirstChild("Time");
 		if(nowNode == NULL)
 		{
