@@ -6,7 +6,6 @@
 #include "opencvCapture.h"
 #include "confReader.h"
 #include <pthread.h>
-#include "tinyxml.h"
 #include <unistd.h>
 
 /////////////////////////////////////////////
@@ -14,14 +13,18 @@
 bool shouldCaptule = false,
 	shouldExit = false;
 
-string ImageFileName,robotGoFileName,robotWalkFileName,robotLeftFileName,robotRightFileName,robotStopFileName;
+string ImageFileName,robotStandFileName,robotGoFileName,robotWalkFileName,robotLeftFileName,robotRightFileName,robotStopFileName;
 int ImageFilterSize=3;
 
-TiXmlDocument robotGo,//第一步
+TiXmlDocument
+	robotStand,//站立
+	robotGo,//第一步
 	robotWalk,//行走步态
 	robotLeft,//左转步态
 	robotRight,//右转步态
 	robotStop;//停止步态
+
+robotAction * actions[6];
 
 /**
  * 初始化
@@ -54,6 +57,22 @@ int init()
 	puts("------------------------------");
 	puts("now loading step file!\n");
 
+	//站立姿态
+	puts("loading step file 'stand'");
+	robotStandFileName = RobotConfReader.getConf("stand");
+	if(robotStandFileName=="null")
+	{
+		puts("error in getting stand step");
+		return 1;
+	}
+	if(!robotStand.LoadFile(robotStandFileName.c_str()))
+	{
+		puts("error loading stand step");
+		return 1;
+	}
+	actions[ACTION_STAND]=new robotAction(robotStand);
+	puts("step file :stand loaded!");
+
 	//启动步伐
 	puts("loading step file 'go'");
 	robotGoFileName = RobotConfReader.getConf("go");
@@ -67,6 +86,7 @@ int init()
 		puts("error in loading go step!");
 		return 1;
 	}
+	actions[ACTION_FIRST_STEP] = new robotAction(robotGo);
 	puts("step file :'go' loaded");
 
 	//行走步伐
@@ -82,6 +102,7 @@ int init()
 		puts("error in loading walk step!");
 		return 1;
 	}
+	actions[ACTION_WALK] = new robotAction(robotWalk);
 	puts("step file :'walk' loaded");
 
 	//左转步态
@@ -97,6 +118,7 @@ int init()
 		puts("error in loading walk step!");
 		return 1;
 	}
+	actions[ACTION_LEFT] = new robotAction(robotLeft);
 	puts("step file :'left' loaded");
 
 	//右转步态
@@ -112,6 +134,7 @@ int init()
 		puts("error in loading right step");
 		return 1;
 	}
+	actions[ACTION_RIGHT] = new robotAction(robotRight);
 	puts("step file :'right' loaded");
 
 	//停止步态
@@ -127,6 +150,7 @@ int init()
 		puts("error in loading stop step");
 		return 1;
 	}
+	actions[ACTION_STOP] = new robotAction(robotStop);
 	puts("step file :'stop' loaded");
 	puts("\nAll the step file has been loaded successfully!\n");
 
@@ -314,3 +338,70 @@ int main(int argc, char** argv )
 
 	return 0;
 }
+
+
+void robotAction::active()
+{
+	this->isActive = true;
+}
+
+bool robotAction::getIsActive()
+{
+	return this->getIsActive();
+}
+
+bool robotAction::getIsAutoCycle()
+{
+	return this->isAutoCycle;
+}
+
+void robotAction::reset()
+{
+	this->it = this->nodeList.begin();
+}
+
+robotAction::robotAction(TiXmlDocument doc)
+{
+	it = nodeList.begin();
+	isActive = false;
+	isAutoCycle = false;
+	TiXmlDocument docDom = *doc;
+	TiXmlElement root= docDom.RootElement();
+
+	for( TiXmlNode*  item = root.FirstChild();
+	         item;
+	         item = item->NextSibling() ) {
+		robotActionNode node;
+
+		TiXmlNode * nowNode = item->FirstChild("Time");
+		if(nowNode == NULL)
+		{
+			puts("error in getting time node of the step!");
+			continue;
+		}
+		sscanf(nowNode->ToElement()->GetText(),"T%d",&node.lastTime);
+
+		nowNode = item->FirstChild("Move");
+		if(nowNode == NULL)
+		{
+			puts("error in getting command node of the step!");
+			continue;
+		}
+		node.data = nowNode->ToElement()->GetText();
+
+		nodeList.push_back(node);
+
+	}
+}
+
+void robotAction::setIsAutoCycle(bool isAutoCycle)
+{
+	this->isAutoCycle = isAutoCycle;
+}
+
+void robotAction::update()
+{
+
+}
+
+

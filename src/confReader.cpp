@@ -19,7 +19,10 @@ confReader::confReader(const char * fileName)
 
 			if(fileReadBuffer[0]=='#')
 				continue;
-
+			if(fileReadBuffer[0]== 0)
+				continue;
+			if(fileReadBuffer[0]==';')
+				continue;
 
 			if(sscanf(fileReadBuffer,"%s %s",confItemName,confItemValue)==EOF)
 			{

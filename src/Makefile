@@ -50,13 +50,13 @@ really-all:	$(BINS)
 
 serialOut.o: serialOut.c serialOut.h header.h
 	@echo now complecting serialOut
-	@$(CC)  -c $(CFLAGS) serialOut.c -o  serialOut.o -lwiringPi 
+	@$(CC) -c $(CFLAGS) `pkg-config --cflags tinyxml` serialOut.c -o  serialOut.o -lwiringPi 
 	
 confReader.o: confReader.cpp confReader.h header.h
 	@echo now complecting confReader
-	@$(CC) -c  confReader.cpp -o confReader.o
+	@$(CC) -c `pkg-config --cflags tinyxml` confReader.cpp -o confReader.o
 	
-robot.o:robot.cpp robot.h header.h ../depend/tinyxml.h 
+robot.o:robot.cpp robot.h header.h
 	@echo now complecting robot
 	@$(CC) -c -ggdb `pkg-config --cflags opencv` `pkg-config --cflags tinyxml` robot.cpp -o robot.o 
 	
