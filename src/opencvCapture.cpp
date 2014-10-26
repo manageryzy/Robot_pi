@@ -222,3 +222,63 @@ void opencvCaptureClose()
 	sequencer->close();
 	delete sequencer;
 }
+
+int otsu(const IplImage *src_image) //大津法求阈值
+{
+    double sum = 0.0;
+    double w0 = 0.0;
+    double w1 = 0.0;
+    double u0_temp = 0.0;
+    double u1_temp = 0.0;
+    double u0 = 0.0;
+    double u1 = 0.0;
+    double delta_temp = 0.0;
+    double delta_max = 0.0;
+
+    //src_image灰度级
+    int pixel_count[256]={0};
+    float pixel_pro[256]={0};
+    int threshold = 0;
+    uchar* data = (uchar*)src_image->imageData;
+    //统计每个灰度级中像素的个数
+    for(int i = 0; i < src_image->height; i++)
+    {
+        for(int j = 0;j < src_image->width;j++)
+        {
+            pixel_count[(int)data[i * src_image->width + j]]++;
+            sum += (int)data[i * src_image->width + j];
+        }
+    }
+    //计算每个灰度级的像素数目占整幅图像的比例
+    for(int i = 0; i < 256; i++)
+    {
+    pixel_pro[i] = (float)pixel_count[i] / ( src_image->height * src_image->width );
+    }
+    //遍历灰度级[0,255],寻找合适的threshold
+    for(int i = 0; i < 256; i++)
+    {
+        w0 = w1 = u0_temp = u1_temp = u0 = u1 = delta_temp = 0;
+        for(int j = 0; j < 256; j++)
+        {
+            if(j <= i)   //背景部分
+            {
+                w0 += pixel_pro[j];
+                u0_temp += j * pixel_pro[j];
+            }
+            else   //前景部分
+            {
+                w1 += pixel_pro[j];
+                u1_temp += j * pixel_pro[j];
+            }
+        }
+        u0 = u0_temp / w0;
+        u1 = u1_temp / w1;
+        delta_temp = (float)(w0 *w1* pow((u0 - u1), 2)) ;
+        if(delta_temp > delta_max)
+        {
+            delta_max = delta_temp;
+            threshold = i;
+        }
+    }
+    return threshold;
+}

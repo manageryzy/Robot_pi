@@ -29,8 +29,8 @@ CC	= g++
 INCLUDE	= -I/usr/local/include
 CFLAGS	= $(DEBUG) -Wall $(INCLUDE) -Winline -pipe 
 
-LDFLAGS	= -L/usr/local/lib
-LDLIBS    = -lwiringPi -lwiringPiDev -lpthread -lm 
+LDFLAGS	= -L/usr/local/lib  
+LDLIBS    = -lwiringPi -lwiringPiDev -lpthread -lm
 
 # Should not alter anything below this line
 ###############################################################################
@@ -56,9 +56,9 @@ confReader.o: confReader.cpp confReader.h header.h
 	@echo now complecting confReader
 	@$(CC) -c  confReader.cpp -o confReader.o
 	
-robot.o:robot.cpp robot.h header.h
+robot.o:robot.cpp robot.h header.h ../depend/tinyxml.h 
 	@echo now complecting robot
-	@$(CC) -c -ggdb `pkg-config --cflags opencv` robot.cpp -o robot.o 
+	@$(CC) -c -ggdb `pkg-config --cflags opencv` `pkg-config --cflags tinyxml` robot.cpp -o robot.o 
 	
 opencvCapture.o:opencvCapture.cpp opencvCapture.h header.h
 	@echo now complecting opencvCapture
@@ -67,7 +67,7 @@ opencvCapture.o:opencvCapture.cpp opencvCapture.h header.h
 
 robot:	serialOut.o confReader.o robot.o opencvCapture.o
 	@echo [link]
-	@$(CC) -o $@ serialOut.o confReader.o opencvCapture.o robot.o $(LDFLAGS) $(LDLIBS)  `pkg-config --libs opencv`
+	@$(CC) -o $@ serialOut.o confReader.o opencvCapture.o robot.o $(LDFLAGS) $(LDLIBS)  `pkg-config --libs opencv`  `pkg-config --libs tinyxml`
 	@cp robot ../robot
 
 .c.o:
