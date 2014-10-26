@@ -3,4 +3,4 @@
 
 int SerialInit();
 void closeSerial();
-void sreialSendString(const char * src);
+void serialSendString(const char * src);

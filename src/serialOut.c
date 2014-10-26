@@ -56,7 +56,7 @@ void closeSerial()
 	printf("serial has been closed!\n");
 }
 
-void sreialSendString(const char * src)
+void serialSendString(const char * src)
 {
 	serialPuts(fd,src);
 }

@@ -22,6 +22,8 @@ class robotAction
 	list<robotActionNode>::iterator it;
 	bool isActive;
 	bool isAutoCycle;//是否自动循环
+	bool isActived;
+	long ActiveTime;
 public :
 	robotAction(string);
 	void update();//状态更新，在住循环中调用

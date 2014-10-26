@@ -25,6 +25,7 @@ TiXmlDocument
 	robotStop;//停止步态
 
 robotAction * actions[6];
+int nowAction;
 
 /**
  * 初始化
@@ -123,6 +124,8 @@ int init()
 	actions[ACTION_STOP] = new robotAction(robotStopFileName);
 	puts("step file :'stop' loaded");
 	puts("\nAll the step file has been loaded successfully!\n");
+
+	nowAction = ACTION_STAND;
 
 	//-----------------------------------
 	//串口初始化
@@ -258,7 +261,10 @@ int main(int argc, char** argv )
 					puts("int autoOstu = otsu(img_gray);");
 				#endif
 
-				cvThreshold(img_smooth,img_twovalue,100,150,CV_THRESH_BINARY);
+				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
+				#ifdef __DEBUG__
+					puts("cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);");
+				#endif
 			}
 
 //			//----------------------------
@@ -298,6 +304,13 @@ int main(int argc, char** argv )
 		//延迟10ms
 		usleep(10000);
 
+		//更新步态
+		actions[nowAction]->update();
+		if(!actions[nowAction]->getIsActive())//查询步态是否完成
+		{
+
+		}
+
 		if (cvWaitKey(1) == 27 || shouldExit)
 			break;
 	}
@@ -317,7 +330,7 @@ void robotAction::active()
 
 bool robotAction::getIsActive()
 {
-	return this->getIsActive();
+	return this->isActive;
 }
 
 bool robotAction::getIsAutoCycle()
@@ -328,6 +341,7 @@ bool robotAction::getIsAutoCycle()
 void robotAction::reset()
 {
 	this->it = this->nodeList.begin();
+	isActived = false;
 }
 
 robotAction::robotAction(string doc)
@@ -351,7 +365,7 @@ robotAction::robotAction(string doc)
 			TiXmlNode * nowNode = item->FirstChild("Time");
 			if(nowNode == NULL)
 			{
-				puts("error in getting time node of the step!");
+				puts("error in getting time node of the step!Ignored!");
 				continue;
 			}
 			if(nowNode->ToElement()->GetText()==0)
@@ -377,9 +391,9 @@ robotAction::robotAction(string doc)
 		catch (...) {
 			puts("Something wrong in dealing xml!ignored!");
 		}
-
-
 	}
+
+	isActived = false;
 }
 
 void robotAction::setIsAutoCycle(bool isAutoCycle)
@@ -389,7 +403,33 @@ void robotAction::setIsAutoCycle(bool isAutoCycle)
 
 void robotAction::update()
 {
-
+	if(!isActive)//非活动状态，退出程序
+		return;
+	if(this->isActived)//本条动作已经激活过了
+	{
+		if(clock()-this->ActiveTime > this->it->lastTime)
+		{
+			this->isActived = false;
+			if(this->it == this->nodeList.end())//步态完成
+			{
+				shouldCaptule = true;//在步态完成之后再主循环的下一次循环的时候捕获图片
+				if(this->isAutoCycle)
+				{
+					it = this->nodeList.begin();
+				}
+				else
+				{
+					isActive = false;
+				}
+			}
+		}
+	}
+	else
+	{
+		serialSendString(this->it->data.c_str());
+		this->isActived = true;
+		this->ActiveTime = clock();
+	}
 }
 
 
