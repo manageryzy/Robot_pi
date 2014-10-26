@@ -17,11 +17,11 @@ bool shouldCaptule = false,
 string ImageFileName,robotGoFileName,robotWalkFileName,robotLeftFileName,robotRightFileName,robotStopFileName;
 int ImageFilterSize=3;
 
-TiXmlDocument *robotGo,//第一步
-	*robotWalk,//行走步态
-	*robotLeft,//左转步态
-	*robotRight,//右转步态
-	*robotStop;//停止步态
+TiXmlDocument robotGo,//第一步
+	robotWalk,//行走步态
+	robotLeft,//左转步态
+	robotRight,//右转步态
+	robotStop;//停止步态
 
 /**
  * 初始化
@@ -62,8 +62,7 @@ int init()
 		puts("error in getting go step");
 		return 1;
 	}
-	robotGo = new TiXmlDocument(robotGoFileName.c_str());
-	if(!robotWalk->LoadFile())
+	if(!robotWalk.LoadFile(robotGoFileName.c_str()))
 	{
 		puts("error in loading go step!");
 		return 1;
@@ -78,8 +77,7 @@ int init()
 		puts("error in getting walk step");
 		return 1;
 	}
-	robotWalk = new TiXmlDocument(robotWalkFileName.c_str());
-	if(!robotWalk->LoadFile())
+	if(!robotWalk.LoadFile(robotWalkFileName.c_str()))
 	{
 		puts("error in loading walk step!");
 		return 1;
@@ -94,8 +92,7 @@ int init()
 		puts("error in getting left step");
 		return 1;
 	}
-	robotLeft = new TiXmlDocument(robotLeftFileName.c_str());
-	if(!robotLeft->LoadFile())
+	if(!robotLeft.LoadFile(robotLeftFileName.c_str()))
 	{
 		puts("error in loading walk step!");
 		return 1;
@@ -110,8 +107,7 @@ int init()
 		puts("error in getting right step");
 		return 1;
 	}
-	robotRight = new TiXmlDocument(robotRightFileName.c_str());
-	if(!robotRight->LoadFile())
+	if(!robotRight.LoadFile(robotRightFileName.c_str()))
 	{
 		puts("error in loading right step");
 		return 1;
@@ -126,8 +122,7 @@ int init()
 		puts("error in getting stop step");
 		return 1;
 	}
-	robotStop = new TiXmlDocument(robotStopFileName.c_str());
-	if(!robotStop->LoadFile())
+	if(!robotStop.LoadFile(robotStopFileName.c_str()))
 	{
 		puts("error in loading stop step");
 		return 1;
