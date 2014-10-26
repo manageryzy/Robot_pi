@@ -347,23 +347,37 @@ robotAction::robotAction(string doc)
 	         item;
 	         item = item->NextSibling() ) {
 		robotActionNode node;
-		TiXmlNode * nowNode = item->FirstChild("Time");
-		if(nowNode == NULL)
-		{
-			puts("error in getting time node of the step!");
-			continue;
-		}
-		sscanf(nowNode->ToElement()->GetText(),"T%d",&node.lastTime);
+		try{
+			TiXmlNode * nowNode = item->FirstChild("Time");
+			if(nowNode == NULL)
+			{
+				puts("error in getting time node of the step!");
+				continue;
+			}
+			if(nowNode->ToElement()->GetText()==0)
+			{
+				throw 0;
+			}
+			sscanf(nowNode->ToElement()->GetText()+1,"%d",&node.lastTime);
 
-		nowNode = item->FirstChild("Move");
-		if(nowNode == NULL)
-		{
-			puts("error in getting command node of the step!");
-			continue;
-		}
-		node.data = nowNode->ToElement()->GetText();
+			nowNode = item->FirstChild("Move");
+			if(nowNode == NULL)
+			{
+				puts("error in getting command node of the step!");
+				continue;
+			}
+			if(nowNode->ToElement()->GetText()==0)
+			{
+				throw 0;
+			}
+			node.data = nowNode->ToElement()->GetText();
 
-		nodeList.push_back(node);
+			nodeList.push_back(node);
+		}
+		catch (...) {
+			puts("Something wrong in dealing xml!ignored!");
+		}
+
 
 	}
 }
