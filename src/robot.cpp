@@ -256,14 +256,19 @@ int main(int argc, char** argv )
 					puts("img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);");
 				#endif
 
-				int autoOstu = otsu(img_gray);
-				#ifdef __DEBUG__
-					puts("int autoOstu = otsu(img_gray);");
-				#endif
+//				int autoOstu = otsu(img_gray);
+//				#ifdef __DEBUG__
+//					puts("int autoOstu = otsu(img_gray);");
+//				#endif
+//
+//				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
+//				#ifdef __DEBUG__
+//					puts("cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);");
+//				#endif
 
-				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
+				cvAdaptiveThreshold(img_smooth,img_twovalue,255);
 				#ifdef __DEBUG__
-					puts("cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);");
+					puts("cvAdaptiveThreshold(img_smooth,img_twovalue,255);");
 				#endif
 			}
 
