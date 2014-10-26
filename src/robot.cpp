@@ -21,8 +21,22 @@ int ImageFilterSize=3;
 int init()
 {
 	confReader RobotConfReader("./conf/robot.conf");
+
+#ifndef CAPTURE_FROM_WEBCAM
 	ImageFileName = RobotConfReader.getConf("image_location");
+	if(ImageFileName=="null")
+	{
+		puts("error in getting image_location!I Quit!");
+		return 1;
+	}
+#endif
+
 	ImageFilterSize = std::atoi( RobotConfReader.getConf("image_filter_size").c_str());
+	if(RobotConfReader.getConf("image_filter_size")=="null")
+	{
+		puts("error in getting image_filter_size");
+		ImageFilterSize=3;
+	}
 
 	if(SerialInit()!=0)
 	{
@@ -157,7 +171,7 @@ int main(int argc, char** argv )
 				#ifdef __DEBUG__
 					puts("show captured!");
 				#endif
-				cvShowImage ("capture", img_canny);
+				cvShowImage ("capture", img_smooth);
 			#endif
 
 			//-----------------------------
