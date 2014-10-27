@@ -300,7 +300,7 @@ int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int e
 		{
 			uchar twoValuePix = dataTwoValu[i * twoValue->width + j];
 			uchar sobelPix = dataSobel[i * twoValue->width + j];
-			if(twoValue == 0)//二值图像呈现黑色
+			if(twoValuePix == 0)//二值图像呈现黑色
 			{
 				bool isErrorSignal = true;
 				for(int it = 0;it<errorSize;it++)
@@ -314,7 +314,7 @@ int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int e
 					}
 					else
 					{
-						if(dataSobel[(i+it)*twoValue->width + j] >50 )//出现边缘信号
+						if(dataSobel[(i-it)*twoValue->width + j] >50 )//出现边缘信号
 						{
 							isErrorSignal = false;
 						}
