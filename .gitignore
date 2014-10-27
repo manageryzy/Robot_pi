@@ -2,5 +2,6 @@
 *.bak
 .cproject
 .project
+.settings
 core
 robot
