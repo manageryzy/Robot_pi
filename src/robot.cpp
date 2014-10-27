@@ -30,6 +30,7 @@ TiXmlDocument
 
 robotAction * actions[6];
 int nowAction;
+int nextAction;//这个只是在转向的时候使用
 
 /**
  * 初始化
@@ -64,12 +65,36 @@ int init()
 		puts("error in getting line1");
 		return 1;
 	}
+	MaxLine1 = std::atoi( RobotConfReader.getConf("maxline1").c_str());
+	if(RobotConfReader.getConf("maxline1")=="null")
+	{
+		puts("error in getting maxline1");
+		return 1;
+	}
+	MinLine1 = std::atoi( RobotConfReader.getConf("minline1").c_str());
+	if(RobotConfReader.getConf("minline1")=="null")
+	{
+		puts("error in getting minline1");
+		return 1;
+	}
 
 	//读取直线2的位置
 	Line2X = std::atoi( RobotConfReader.getConf("line2").c_str());
 	if(RobotConfReader.getConf("line2")=="null")
 	{
 		puts("error in getting line2");
+		return 1;
+	}
+	MaxLine2 = std::atoi( RobotConfReader.getConf("maxline2").c_str());
+	if(RobotConfReader.getConf("maxline2")=="null")
+	{
+		puts("error in getting maxline2");
+		return 1;
+	}
+	MinLine2 = std::atoi( RobotConfReader.getConf("minline2").c_str());
+	if(RobotConfReader.getConf("minline2")=="null")
+	{
+		puts("error in getting minline2");
 		return 1;
 	}
 
@@ -368,13 +393,15 @@ int main(int argc, char** argv )
 				if(line1>MaxLine1)//近处的线太靠近了，需要远离
 				{
 					actions[nowAction]->stop();
-					nowAction = ACTION_LEFT;
+					nextAction = ACTION_LEFT;
+					nowAction = ACTION_STOP;
 					actions[nowAction]->active();
 				}
 				else if(line1<MinLine1)
 				{
 					actions[nowAction]->stop();
-					nowAction = ACTION_RIGHT;
+					nextAction = ACTION_RIGHT;
+					nowAction = ACTION_STOP;
 					actions[nowAction]->active();
 				}
 				else
@@ -400,15 +427,21 @@ int main(int argc, char** argv )
 				else
 				{
 					actions[nowAction]->stop();
-					nowAction = ACTION_WALK;
+					nowAction = ACTION_STAND;
 					actions[nowAction]->active();
 				}
 				break;
 			case ACTION_STOP:
-				shouldExit = true;
+				actions[nowAction]->stop();
+				nowAction = nextAction;
+				actions[nowAction]->active();
 				break;
 			}
 		}
+
+		#ifdef __DEBUG__
+			printf("now action: %d \n",nowAction);
+		#endif
 
 		if (cvWaitKey(1) == 27 || shouldExit)
 			break;
