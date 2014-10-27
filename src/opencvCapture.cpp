@@ -283,8 +283,14 @@ int otsu(const IplImage *src_image) //大津法求阈值
     return threshold;
 }
 
+int abs(int i)
+{
+	return i>0?i:-i;
+}
+
 int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int errorSize)
 {
+	int ret=-1;
 	if(twoValue->height!=sobel->height||twoValue->width!=sobel->width)
 	{
 		puts("Error :can't scan for the black line!for the size do not match!");
@@ -293,7 +299,7 @@ int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int e
 
 	uchar* dataTwoValu = (uchar*)twoValue->imageData;
 	uchar* dataSobel = (uchar*)sobel->imageData;
-	//统计每个灰度级中像素的个数
+
 	for(int i = 0; i < twoValue->height; i++)
 	{
 		for(int j = lineX;j < twoValue->width;j++)
@@ -324,6 +330,8 @@ int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int e
 				if(isErrorSignal == false)
 				{
 					dataTwoValu[i * twoValue->width + j] = BLACK_LINE_SIGNAL;
+					if(abs(ret-twoValue->height/2)>abs(i-twoValue->height/2))
+						ret = i;
 				}
 				else
 				{
@@ -338,6 +346,5 @@ int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int e
 			break;
 		}
 	}
-
-	return 0;
+	return ret;
 }

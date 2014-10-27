@@ -16,6 +16,10 @@ bool shouldCaptule = false,
 string ImageFileName,robotStandFileName,robotGoFileName,robotWalkFileName,robotLeftFileName,robotRightFileName,robotStopFileName;
 int ImageFilterSize=3;
 
+int Line1X,Line2X,LineFindingError;
+int line1=0,line2=0;//两条检测线的结果
+int MaxLine1,MinLine1,MaxLine2,MinLine2;
+
 TiXmlDocument
 	robotStand,//站立
 	robotGo,//第一步
@@ -53,6 +57,30 @@ int init()
 		ImageFilterSize=3;
 	}
 
+	//读取直线1的位置
+	Line1X = std::atoi( RobotConfReader.getConf("line1").c_str());
+	if(RobotConfReader.getConf("line1")=="null")
+	{
+		puts("error in getting line1");
+		return 1;
+	}
+
+	//读取直线2的位置
+	Line2X = std::atoi( RobotConfReader.getConf("line2").c_str());
+	if(RobotConfReader.getConf("line2")=="null")
+	{
+		puts("error in getting line2");
+		return 1;
+	}
+
+	//读取直线2的位置
+	LineFindingError = std::atoi( RobotConfReader.getConf("lineError").c_str());
+	if(RobotConfReader.getConf("lineError")=="null")
+	{
+		puts("error in getting lineError");
+		LineFindingError = 10;
+	}
+
 	//------------------------------
 	//读取步态文件
 	puts("------------------------------");
@@ -67,6 +95,7 @@ int init()
 		return 1;
 	}
 	actions[ACTION_STAND]=new robotAction(robotStandFileName);
+	actions[ACTION_STAND]->setIsAutoCycle(false);
 	puts("step file :stand loaded!");
 
 	//启动步伐
@@ -78,6 +107,7 @@ int init()
 		return 1;
 	}
 	actions[ACTION_FIRST_STEP] = new robotAction(robotGoFileName);
+	actions[ACTION_FIRST_STEP]->setIsAutoCycle(false);
 	puts("step file :'go' loaded");
 
 	//行走步伐
@@ -89,6 +119,7 @@ int init()
 		return 1;
 	}
 	actions[ACTION_WALK] = new robotAction(robotWalkFileName);
+	actions[ACTION_WALK]->setIsAutoCycle(true);
 	puts("step file :'walk' loaded");
 
 	//左转步态
@@ -100,6 +131,7 @@ int init()
 		return 1;
 	}
 	actions[ACTION_LEFT] = new robotAction(robotLeftFileName);
+	actions[ACTION_LEFT]->setIsAutoCycle(false);
 	puts("step file :'left' loaded");
 
 	//右转步态
@@ -111,6 +143,7 @@ int init()
 		return 1;
 	}
 	actions[ACTION_RIGHT] = new robotAction(robotRightFileName);
+	actions[ACTION_RIGHT]->setIsAutoCycle(false);
 	puts("step file :'right' loaded");
 
 	//停止步态
@@ -122,6 +155,7 @@ int init()
 		return 1;
 	}
 	actions[ACTION_STOP] = new robotAction(robotStopFileName);
+	actions[ACTION_STOP]->setIsAutoCycle(false);
 	puts("step file :'stop' loaded");
 	puts("\nAll the step file has been loaded successfully!\n");
 
@@ -291,7 +325,8 @@ int main(int argc, char** argv )
 
 			//对二值图进行变换，找出有黑线的部分
 			{
-				findBlackLine(img_twovalue,img_canny,300,30);
+				line1 = findBlackLine(img_twovalue,img_canny,Line1X,LineFindingError);
+				line2 = findBlackLine(img_twovalue,img_canny,Line2X,LineFindingError);
 			}
 
 			//-----------------------------
@@ -319,7 +354,60 @@ int main(int argc, char** argv )
 		actions[nowAction]->update();
 		if(!actions[nowAction]->getIsActive())//查询步态是否完成
 		{
-
+			switch(nowAction)
+			{
+			case ACTION_STAND:
+				nowAction = ACTION_FIRST_STEP;
+				actions[nowAction]->active();
+				break;
+			case ACTION_FIRST_STEP:
+				nowAction = ACTION_WALK;
+				actions[nowAction]->active();
+				break;
+			case ACTION_WALK:
+				if(line1>MaxLine1)//近处的线太靠近了，需要远离
+				{
+					actions[nowAction]->stop();
+					nowAction = ACTION_LEFT;
+					actions[nowAction]->active();
+				}
+				else if(line1<MinLine1)
+				{
+					actions[nowAction]->stop();
+					nowAction = ACTION_RIGHT;
+					actions[nowAction]->active();
+				}
+				else
+				{
+					//继续行走，什么都不用管
+					actions[nowAction]->active();
+				}
+				break;
+			case ACTION_LEFT:
+			case ACTION_RIGHT:
+				if(line2>MaxLine2)
+				{
+					actions[nowAction]->stop();
+					nowAction = ACTION_LEFT;
+					actions[nowAction]->active();
+				}
+				else if(line2<MinLine2)
+				{
+					actions[nowAction]->stop();
+					nowAction = ACTION_RIGHT;
+					actions[nowAction]->active();
+				}
+				else
+				{
+					actions[nowAction]->stop();
+					nowAction = ACTION_WALK;
+					actions[nowAction]->active();
+				}
+				break;
+			case ACTION_STOP:
+				shouldExit = true;
+				break;
+			}
 		}
 
 		if (cvWaitKey(1) == 27 || shouldExit)
@@ -336,6 +424,7 @@ int main(int argc, char** argv )
 
 void robotAction::active()
 {
+	this->reset();
 	this->isActive = true;
 }
 
@@ -428,10 +517,8 @@ void robotAction::update()
 				{
 					it = this->nodeList.begin();
 				}
-				else
-				{
-					isActive = false;
-				}
+
+				isActive = false;
 			}
 		}
 	}
@@ -443,4 +530,8 @@ void robotAction::update()
 	}
 }
 
+void robotAction::stop()
+{
+	this->isActive = false;
+}
 

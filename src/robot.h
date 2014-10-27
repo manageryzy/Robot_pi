@@ -32,4 +32,5 @@ public :
 	void setIsAutoCycle(bool);
 	void reset();//重置动作组
 	void active();//开始动作
+	void stop();
 };
