@@ -289,6 +289,11 @@ int main(int argc, char** argv )
 				#endif
 			}
 
+			//对二值图进行变换，找出有黑线的部分
+			{
+				findBlackLine(img_twovalue,img_canny,100,30);
+			}
+
 			//-----------------------------
 			//显示图像
 			#ifdef SHOW_GUI

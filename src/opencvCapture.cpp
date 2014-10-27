@@ -282,3 +282,62 @@ int otsu(const IplImage *src_image) //大津法求阈值
     }
     return threshold;
 }
+
+int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int errorSize)
+{
+	if(twoValue->height!=sobel->height||twoValue->width!=sobel->width)
+	{
+		puts("Error :can't scan for the black line!for the size do not match!");
+		return 0;
+	}
+
+	uchar* dataTwoValu = (uchar*)twoValue->imageData;
+	uchar* dataSobel = (uchar*)sobel->imageData;
+	//统计每个灰度级中像素的个数
+	for(int i = 0; i < twoValue->height; i++)
+	{
+		for(int j = lineX;j < twoValue->width;j++)
+		{
+			uchar twoValuePix = dataTwoValu[i * twoValue->width + j];
+			uchar sobelPix = dataSobel[i * twoValue->width + j];
+			if(twoValue == 0)//二值图像呈现黑色
+			{
+				bool isErrorSignal = true;
+				for(int it = 0;it<errorSize;it++)
+				{
+					if(i< twoValue->height/2)
+					{
+						if(dataSobel[(i+it)*twoValue->width + j] >50 )//出现边缘信号
+						{
+							isErrorSignal = false;
+						}
+					}
+					else
+					{
+						if(dataSobel[(i+it)*twoValue->width + j] >50 )//出现边缘信号
+						{
+							isErrorSignal = false;
+						}
+					}
+				}
+
+				if(isErrorSignal == false)
+				{
+					dataTwoValu[i * twoValue->width + j] = BLACK_LINE_SIGNAL;
+				}
+				else
+				{
+					dataTwoValu[i * twoValue->width + j] = NO_LINE_SIGNAL;
+				}
+			}
+			else
+			{
+				dataTwoValu[i * twoValue->width + j] = NOT_LINE;
+			}
+
+			break;
+		}
+	}
+
+	return 0;
+}
