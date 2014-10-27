@@ -185,8 +185,8 @@ int main(int argc, char** argv )
 	IplImage *img, //原始图像
 		*img_gray, //灰度图像
 		*img_smooth,//滤波图像
-		*img_twovalue;//二值化图像
-//		*img_canny; //canny 检测之后的图像
+		*img_twovalue,//二值化图像
+		*img_canny; //canny 检测之后的图像
 
 	if(init()!=0)
 		exit(-1);
@@ -256,37 +256,38 @@ int main(int argc, char** argv )
 					puts("img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);");
 				#endif
 
-//				int autoOstu = otsu(img_gray);
-//				#ifdef __DEBUG__
-//					puts("int autoOstu = otsu(img_gray);");
-//				#endif
-//
-//				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
-//				#ifdef __DEBUG__
-//					puts("cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);");
-//				#endif
-
-				cvAdaptiveThreshold(img_smooth,img_twovalue,255);
+				int autoOstu = otsu(img_gray);
 				#ifdef __DEBUG__
-					puts("cvAdaptiveThreshold(img_smooth,img_twovalue,255);");
+					puts("int autoOstu = otsu(img_gray);");
 				#endif
+
+				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
+				#ifdef __DEBUG__
+					puts("cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);");
+				#endif
+
+				//自带的自适应二值化方法，由于效果不好，放弃
+//				cvAdaptiveThreshold(img_smooth,img_twovalue,255);
+//				#ifdef __DEBUG__
+//					puts("cvAdaptiveThreshold(img_smooth,img_twovalue,255);");
+//				#endif
 			}
 
-//			//----------------------------
-//			//canny 变换
-//			{
-//				//创建canny变换的图像
-//				img_canny = cvCreateImage(cvGetSize(img),img->depth,1);
-//				#ifdef __DEBUG__
-//					puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
-//				#endif
-//
-//				//进行变换
-//				cvCanny(img_gray,img_canny,30,50,3);
-//				#ifdef __DEBUG__
-//					puts("cvCanny(img_gray,img_canny,30,50,3);");
-//				#endif
-//			}
+			//----------------------------
+			//canny 变换，用来和二值化图像一起使用来进行判断
+			{
+				//创建canny变换的图像
+				img_canny = cvCreateImage(cvGetSize(img),img->depth,1);
+				#ifdef __DEBUG__
+					puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
+				#endif
+
+				//进行变换
+				cvCanny(img_gray,img_canny,30,50,3);
+				#ifdef __DEBUG__
+					puts("cvCanny(img_gray,img_canny,30,50,3);");
+				#endif
+			}
 
 			//-----------------------------
 			//显示图像
@@ -303,7 +304,7 @@ int main(int argc, char** argv )
 			cvReleaseImage(&img_gray);
 			cvReleaseImage(&img_smooth);
 			cvReleaseImage(&img_twovalue);
-//			cvReleaseImage(&img_canny);
+			cvReleaseImage(&img_canny);
 		}
 
 		//延迟10ms
