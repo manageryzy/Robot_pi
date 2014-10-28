@@ -32,11 +32,13 @@ int fd ;
 //初始化串口
 int SerialInit()
 {
+	puts("serial init!");
 	if ((fd = serialOpen ("/dev/ttyAMA0", 115200)) < 0)
 	{
 		fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
 		return 1 ;
 	}
+	puts("serial opened!");
 
 	if (wiringPiSetup () == -1)
 	{
@@ -45,6 +47,7 @@ int SerialInit()
 	}
 
 	//serialPuts (fd,"#13 P1500 T1000\r\n");
+	puts("serial init finished!");
 
 	return 0 ;
 }
@@ -59,4 +62,8 @@ void closeSerial()
 void serialSendString(const char * src)
 {
 	serialPuts(fd,src);
+#ifdef __DEBUG__
+	puts("serial sent:");
+	puts(src);
+#endif
 }

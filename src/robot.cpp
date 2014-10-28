@@ -184,7 +184,7 @@ int init()
 	puts("step file :'stop' loaded");
 	puts("\nAll the step file has been loaded successfully!\n");
 
-	nowAction = ACTION_STAND;
+
 
 	//-----------------------------------
 	//串口初始化
@@ -214,6 +214,8 @@ int init()
 #endif
 
 	shouldCaptule = true;
+	nowAction = ACTION_STAND;
+	actions[nowAction]->active();
 
 	return 0;
 
@@ -437,11 +439,12 @@ int main(int argc, char** argv )
 				actions[nowAction]->active();
 				break;
 			}
+			#ifdef __DEBUG__
+				printf("now action: %d \n",nowAction);
+			#endif
 		}
 
-		#ifdef __DEBUG__
-			printf("now action: %d \n",nowAction);
-		#endif
+
 
 		if (cvWaitKey(1) == 27 || shouldExit)
 			break;
@@ -459,6 +462,7 @@ void robotAction::active()
 {
 	this->reset();
 	this->isActive = true;
+	this->ActiveTime = clock();
 }
 
 bool robotAction::getIsActive()
@@ -496,6 +500,7 @@ robotAction::robotAction(string doc)
 		robotActionNode node;
 		try{
 			TiXmlNode * nowNode = item->FirstChild("Time");
+			string timeStr;
 			if(nowNode == NULL)
 			{
 				puts("error in getting time node of the step!Ignored!");
@@ -506,6 +511,7 @@ robotAction::robotAction(string doc)
 				throw 0;
 			}
 			sscanf(nowNode->ToElement()->GetText()+1,"%d",&node.lastTime);
+			timeStr = nowNode->ToElement()->GetText();
 
 			nowNode = item->FirstChild("Move");
 			if(nowNode == NULL)
@@ -518,6 +524,10 @@ robotAction::robotAction(string doc)
 				throw 0;
 			}
 			node.data = nowNode->ToElement()->GetText();
+			node.data.append(1,' ');
+			node.data.append(timeStr);
+			node.data.append(1,'\r');
+			node.data.append(1,'\n');
 
 			nodeList.push_back(node);
 		}
@@ -540,10 +550,10 @@ void robotAction::update()
 		return;
 	if(this->isActived)//本条动作已经激活过了
 	{
-		if(clock()-this->ActiveTime > this->it->lastTime)
+		if((clock()-this->ActiveTime) > ((long)this->it->lastTime*200))
 		{
-			this->isActived = false;
-			if(this->it == this->nodeList.end())//步态完成
+
+			if(++this->it == this->nodeList.end())//步态完成
 			{
 				shouldCaptule = true;//在步态完成之后再主循环的下一次循环的时候捕获图片
 				if(this->isAutoCycle)
@@ -552,7 +562,9 @@ void robotAction::update()
 				}
 
 				isActive = false;
+				return ;
 			}
+			this->isActived = false; // 脑残无药医也
 		}
 	}
 	else
