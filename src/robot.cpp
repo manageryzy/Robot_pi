@@ -11,7 +11,8 @@
 /////////////////////////////////////////////
 //global flags
 bool shouldCaptule = false,
-	shouldExit = false;
+	shouldExit = false,
+	captureFinished = false;
 
 confReader * RobotConfReader;
 
@@ -308,7 +309,26 @@ int main(int argc, char** argv )
 				if(autoOstu > 100)
 				{
 					puts("pure white!");
-					exit(0);
+					switch(getStatue())
+					{
+					case STATUE_STAND:
+						actionQueue.push(ACTION_TURN_RIGHT);
+						break;
+					case STATUE_LEFT_AHEAD:
+						actionQueue.push(ACTION_LEFT_TO_STAND);
+						actionQueue.push(ACTION_TURN_RIGHT);
+						break;
+					case STATUE_RIGHT_AHEAD:
+						actionQueue.push(ACTION_RIGHT_TO_STAND);
+						actionQueue.push(ACTION_TURN_RIGHT);
+						break;
+					default:
+						puts("ERROR!UNDEF STATUE!");
+						actionQueue.push(ACTION_STAND_STAND);
+						actionQueue.push(ACTION_TURN_RIGHT);
+						break;
+					}
+					autoOstu = 70;
 				}
 				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
 				#ifdef __DEBUG__
@@ -359,6 +379,8 @@ int main(int argc, char** argv )
 			cvReleaseImage(&img_smooth);
 			cvReleaseImage(&img_twovalue);
 			cvReleaseImage(&img_canny);
+
+			captureFinished = true;
 		}
 
 		//延迟10ms
@@ -370,7 +392,78 @@ int main(int argc, char** argv )
 		{
 			if(actionQueue.empty())
 			{
-
+				if(captureFinished)
+				{
+					//进行步态的选择啦
+					if(line1>=MaxLine1)//左转
+					{
+						switch(getStatue())
+						{
+						case STATUE_LEFT_AHEAD:
+							actionQueue.push(ACTION_LEFT_TO_STAND);
+							break;
+						case STATUE_RIGHT_AHEAD:
+							actionQueue.push(ACTION_RIGHT_TO_STAND);
+							break;
+						case STATUE_STAND:break;
+						default:
+							puts("UNKONW STATUE");
+							actionQueue.push(ACTION_STAND_STAND);
+							break;
+						}
+						actionQueue.push(ACTION_TURN_LEFT);
+					}
+					else if(line1<MinLine1)//右转
+					{
+						switch(getStatue())
+						{
+						case STATUE_STAND:
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						case STATUE_LEFT_AHEAD:
+							actionQueue.push(ACTION_LEFT_TO_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						case STATUE_RIGHT_AHEAD:
+							actionQueue.push(ACTION_RIGHT_TO_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						default:
+							puts("ERROR!UNDEF STATUE!");
+							actionQueue.push(ACTION_STAND_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						}
+					}
+					else
+					{
+						//根据当前状态继续步态
+						switch(getStatue())
+						{
+						case STATUE_LEFT_AHEAD:
+							nowAction = ACTION_WALK_RIGHT;
+							actions[nowAction]->active();
+							break;
+						case STATUE_RIGHT_AHEAD:
+							nowAction = ACTION_WALK_LEFT;
+							actions[nowAction]->active();
+							break;
+						case STATUE_STAND:
+							nowAction = ACTION_STAND_TO_LEFT;
+							actions[nowAction]->active();
+							break;
+						default:
+							nowAction = ACTION_STAND_STAND;
+							actions[nowAction]->active();
+							break;
+						}
+					}
+				}
+				else
+				{
+					shouldCaptule = true;
+					captureFinished = false;
+				}
 			}
 			else//指令队列还有指令，等待指令结束
 			{
