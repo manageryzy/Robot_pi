@@ -360,6 +360,7 @@ int main(int argc, char** argv )
 
 			//对二值图进行变换，找出有黑线的部分
 			{
+				line1 = 1024;
 				line1 = findBlackLine(img_twovalue,img_canny,Line1X,LineFindingError);
 			}
 
@@ -412,6 +413,7 @@ int main(int argc, char** argv )
 							break;
 						}
 						actionQueue.push(ACTION_TURN_LEFT);
+						actionQueue.push(ACTION_STAND_TO_LEFT);
 					}
 					else if(line1<MinLine1)//右转
 					{
@@ -434,6 +436,7 @@ int main(int argc, char** argv )
 							actionQueue.push(ACTION_TURN_RIGHT);
 							break;
 						}
+						actionQueue.push(ACTION_STAND_TO_RIGHT);
 					}
 					else
 					{
