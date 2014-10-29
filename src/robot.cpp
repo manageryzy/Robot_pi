@@ -362,6 +362,7 @@ int main(int argc, char** argv )
 			{
 				line1 = 1024;
 				line1 = findBlackLine(img_twovalue,img_canny,Line1X,LineFindingError);
+				cvCircle(img,cvPoint(Line1X,line1),10,cvScalar(255,0,0,0.5));
 			}
 
 			//-----------------------------
@@ -370,7 +371,7 @@ int main(int argc, char** argv )
 				#ifdef __DEBUG__
 					puts("show captured!");
 				#endif
-				cvShowImage ("capture", img_twovalue);
+				cvShowImage ("capture", img);
 			#endif
 
 			//-----------------------------
