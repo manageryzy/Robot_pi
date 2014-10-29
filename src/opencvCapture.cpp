@@ -210,6 +210,7 @@ IplImage * myCaptureImage()
 	{
 		if(dropFrames++<=6)
 		{
+			cvReleaseImage(&img);
 			continue;
 		}
 		return img;
@@ -288,8 +289,9 @@ int abs(int i)
 	return i>0?i:-i;
 }
 
-int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int errorSize)
+const int findBlackLine(const IplImage *twoValue,const IplImage *sobel,IplImage *img,int lineX,int errorSize)
 {
+	int whiteCount,blackCount;
 	int ret=-1;
 	if(twoValue->height!=sobel->height||twoValue->width!=sobel->width)
 	{
@@ -306,41 +308,35 @@ int findBlackLine(const IplImage *twoValue,const IplImage *sobel,int lineX,int e
 		{
 			uchar twoValuePix = dataTwoValu[i * twoValue->width + j];
 			uchar sobelPix = dataSobel[i * twoValue->width + j];
-			if(twoValuePix == 0)//二值图像呈现黑色
+
+			whiteCount = 0;
+			blackCount = 0;
+
+			if(sobelPix>=100)
 			{
-				bool isErrorSignal = true;
-				for(int it = 0;it<errorSize;it++)
+				for(int I = 0; I < errorSize; I++)
 				{
-					if(i< twoValue->height/2)
+					if(dataTwoValu[(i-I) * twoValue->width + j] == 0)
 					{
-						if(dataSobel[(i+it)*twoValue->width + j] >50 )//出现边缘信号
-						{
-							isErrorSignal = false;
-						}
+						blackCount++;
 					}
-					else
+					if(dataTwoValu[(i+I) * twoValue->width + j] != 0)
 					{
-						if(dataSobel[(i-it)*twoValue->width + j] >50 )//出现边缘信号
-						{
-							isErrorSignal = false;
-						}
+						whiteCount++;
 					}
 				}
 
-				if(isErrorSignal == false)
+				if(((float)blackCount/errorSize > 0.6) && ((float)whiteCount/errorSize >0.6))
 				{
-					dataTwoValu[i * twoValue->width + j] = BLACK_LINE_SIGNAL;
-					if(abs(ret-twoValue->height/2)>abs(i-twoValue->height/2))
-						ret = i;
+					//合格信号
+					ret = i;
 				}
 				else
 				{
-					dataTwoValu[i * twoValue->width + j] = NO_LINE_SIGNAL;
+					puts("error signal");
+					cvCircle(img,cvPoint(j,i),10,cvScalar(0,255,0,0.5),1, 8, 0);
+					printf("b:%d w:%d x:%d y:%d\n",blackCount,whiteCount,j,i);
 				}
-			}
-			else
-			{
-				dataTwoValu[i * twoValue->width + j] = NOT_LINE;
 			}
 
 			break;

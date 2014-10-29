@@ -306,27 +306,31 @@ int main(int argc, char** argv )
 					puts("int autoOstu = otsu(img_gray);");
 				#endif
 
-				if(autoOstu > 100)
+				printf("ostu = %d\n",autoOstu);
+				if(autoOstu > 110)
 				{
 					puts("pure white!");
-					switch(getStatue())
+					if(actionQueue.empty())
 					{
-					case STATUE_STAND:
-						actionQueue.push(ACTION_TURN_RIGHT);
-						break;
-					case STATUE_LEFT_AHEAD:
-						actionQueue.push(ACTION_LEFT_TO_STAND);
-						actionQueue.push(ACTION_TURN_RIGHT);
-						break;
-					case STATUE_RIGHT_AHEAD:
-						actionQueue.push(ACTION_RIGHT_TO_STAND);
-						actionQueue.push(ACTION_TURN_RIGHT);
-						break;
-					default:
-						puts("ERROR!UNDEF STATUE!");
-						actionQueue.push(ACTION_STAND_STAND);
-						actionQueue.push(ACTION_TURN_RIGHT);
-						break;
+						switch(getStatue())
+						{
+						case STATUE_STAND:
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						case STATUE_LEFT_AHEAD:
+							actionQueue.push(ACTION_LEFT_TO_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						case STATUE_RIGHT_AHEAD:
+							actionQueue.push(ACTION_RIGHT_TO_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						default:
+							puts("ERROR!UNDEF STATUE!");
+							actionQueue.push(ACTION_STAND_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						}
 					}
 					autoOstu = 70;
 				}
@@ -361,7 +365,7 @@ int main(int argc, char** argv )
 			//对二值图进行变换，找出有黑线的部分
 			{
 				line1 = 1024;
-				line1 = findBlackLine(img_twovalue,img_canny,Line1X,LineFindingError);
+				line1 = findBlackLine(img_twovalue,img_canny,img,Line1X,LineFindingError);
 				cvCircle(img,cvPoint(Line1X,line1),10,cvScalar(255,0,0,0.5));
 			}
 
@@ -392,8 +396,10 @@ int main(int argc, char** argv )
 		actions[nowAction]->update();
 		if(!actions[nowAction]->getIsActive())//查询步态是否完成
 		{
+			puts("step finish!");
 			if(actionQueue.empty())
 			{
+				puts("new action group");
 				if(captureFinished)
 				{
 					//进行步态的选择啦
@@ -471,11 +477,14 @@ int main(int argc, char** argv )
 			}
 			else//指令队列还有指令，等待指令结束
 			{
+				puts("action group now finish!");
 				nowAction = actionQueue.front();
 				actionQueue.pop();
 				actions[nowAction]->active();
 			}
+			printf("%d\n",nowAction);
 		}
+
 
 
 

@@ -16,7 +16,7 @@
 
 	//下面的是一些开关
 	#define SHOW_GUI
-	#define __DEBUG__
+	//#define __DEBUG__
 	#define CAPTURE_FROM_WEBCAM
 
 	#define BLACK_LINE_SIGNAL 127 /*这个是在二值图中检测用的，请不要在二值图中自然的出现这个数值*/
