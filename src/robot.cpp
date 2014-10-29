@@ -197,7 +197,7 @@ int init()
 #endif
 
 	shouldCaptule = true;
-	nowAction = ACTION_STAND;
+	nowAction = ACTION_STAND_STAND;
 	actions[nowAction]->active();
 
 	return 0;

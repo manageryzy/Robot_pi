@@ -8,6 +8,7 @@
 int init();
 void release();
 int main(int argc, char** argv );
+int loadStep(int index,const char * conf_name);
 
 class robotActionNode
 {
@@ -34,3 +35,4 @@ public :
 	void active();//开始动作
 	void stop();
 };
+

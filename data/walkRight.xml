@@ -30,22 +30,4 @@
     <Time> T1000</Time>
     <position> POS0X=491Y=95 POS1X=491Y=214 POS2X=491Y=333 POS13X=635Y=338 POS14X=637Y=208 POS15X=630Y=92</position>
   </Table1>
-  <Table1>
-    <ID>6</ID>
-    <Move> #0 P1565 #1 P1560 #2 P1630 #13 P1770 #14 P1610 #15 P1770</Move>
-    <Time> T1000</Time>
-    <position> POS0X=491Y=95 POS1X=491Y=214 POS2X=491Y=333 POS13X=635Y=338 POS14X=637Y=208 POS15X=630Y=92</position>
-  </Table1>
-  <Table1>
-    <ID>7</ID>
-    <Move> #0 P1455 #1 P1390 #2 P1630 #13 P1770 #14 P1400 #15 P1450</Move>
-    <Time> T1000</Time>
-    <position> POS0X=491Y=95 POS1X=491Y=214 POS2X=491Y=333 POS13X=635Y=338 POS14X=637Y=208 POS15X=630Y=92</position>
-  </Table1>
-  <Table1>
-    <ID>8</ID>
-    <Move> #0 P1295 #1 P1200 #2 P1630 #13 P1770 #14 P1150 #15 P1210</Move>
-    <Time> T1000</Time>
-    <position> POS0X=491Y=95 POS1X=491Y=214 POS2X=491Y=333 POS13X=635Y=338 POS14X=637Y=208 POS15X=630Y=92</position>
-  </Table1>
 </NewDataSet>
