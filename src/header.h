@@ -8,6 +8,7 @@
 	//STL
 	#include <map>
 	#include <list>
+	#include <queue>
 	#include <string>
 	//xml解析库
 	#include "tinyxml.h"
@@ -28,7 +29,7 @@
 	#define ACTION_WALK_LEFT 3
 	#define ACTION_WALK_RIGHT 4
 	#define ACTION_LEFT_TO_STAND 5
-	#define ACTION_RIGHT_TO_LEFT 6
+	#define ACTION_RIGHT_TO_STAND 6
 	#define ACTION_TURN_LEFT 7
 	#define ACTION_TURN_RIGHT 8
 

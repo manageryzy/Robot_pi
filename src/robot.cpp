@@ -32,7 +32,7 @@ TiXmlDocument
 
 robotAction * actions[9];
 int nowAction;
-int nextAction;//这个只是在转向的时候使用
+queue<int> actionQueue;
 
 
 int loadStep(int index,const char * conf_name)
@@ -57,7 +57,7 @@ int init()
 {
 	//----------------------------
 	//读取配置文件
-	RobotConfReader = RobotConfReader("./conf/robot.conf");
+	RobotConfReader = new confReader("./conf/robot.conf");
 
 #ifndef CAPTURE_FROM_WEBCAM
 	ImageFileName = RobotConfReader->getConf("image_location");
@@ -147,7 +147,7 @@ int init()
 		return 1;
 	}
 
-	if(loadStep(ACTION_RIGHT_TO_LEFT,"rightToStand")!=0)
+	if(loadStep(ACTION_RIGHT_TO_STAND,"rightToStand")!=0)
 	{
 		puts("error in read step!Quit");
 		return 1;
@@ -305,9 +305,14 @@ int main(int argc, char** argv )
 					puts("int autoOstu = otsu(img_gray);");
 				#endif
 
+				if(autoOstu > 100)
+				{
+					puts("pure white!");
+					exit(0);
+				}
 				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
 				#ifdef __DEBUG__
-					puts("cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);");
+					printf("cvThreshold(img_smooth,img_twovalue,%d,150,CV_THRESH_BINARY);\n",autoOstu);
 				#endif
 
 				//自带的自适应二值化方法，由于效果不好，放弃
@@ -336,7 +341,6 @@ int main(int argc, char** argv )
 			//对二值图进行变换，找出有黑线的部分
 			{
 				line1 = findBlackLine(img_twovalue,img_canny,Line1X,LineFindingError);
-				line2 = findBlackLine(img_twovalue,img_canny,Line2X,LineFindingError);
 			}
 
 			//-----------------------------
@@ -364,67 +368,16 @@ int main(int argc, char** argv )
 		actions[nowAction]->update();
 		if(!actions[nowAction]->getIsActive())//查询步态是否完成
 		{
-			switch(nowAction)
+			if(actionQueue.empty())
 			{
-			case ACTION_STAND:
-				nowAction = ACTION_FIRST_STEP;
-				actions[nowAction]->active();
-				break;
-			case ACTION_FIRST_STEP:
-				nowAction = ACTION_WALK;
-				actions[nowAction]->active();
-				break;
-			case ACTION_WALK:
-				if(line1>MaxLine1)//近处的线太靠近了，需要远离
-				{
-					actions[nowAction]->stop();
-					nextAction = ACTION_LEFT;
-					nowAction = ACTION_STOP;
-					actions[nowAction]->active();
-				}
-				else if(line1<MinLine1)
-				{
-					actions[nowAction]->stop();
-					nextAction = ACTION_RIGHT;
-					nowAction = ACTION_STOP;
-					actions[nowAction]->active();
-				}
-				else
-				{
-					//继续行走，什么都不用管
-					actions[nowAction]->active();
-				}
-				break;
-			case ACTION_LEFT:
-			case ACTION_RIGHT:
-				if(line2>MaxLine2)
-				{
-					actions[nowAction]->stop();
-					nowAction = ACTION_LEFT;
-					actions[nowAction]->active();
-				}
-				else if(line2<MinLine2)
-				{
-					actions[nowAction]->stop();
-					nowAction = ACTION_RIGHT;
-					actions[nowAction]->active();
-				}
-				else
-				{
-					actions[nowAction]->stop();
-					nowAction = ACTION_STAND;
-					actions[nowAction]->active();
-				}
-				break;
-			case ACTION_STOP:
-				actions[nowAction]->stop();
-				nowAction = nextAction;
-				actions[nowAction]->active();
-				break;
+
 			}
-			#ifdef __DEBUG__
-				printf("now action: %d \n",nowAction);
-			#endif
+			else//指令队列还有指令，等待指令结束
+			{
+				nowAction = actionQueue.front();
+				actionQueue.pop();
+				actions[nowAction]->active();
+			}
 		}
 
 
@@ -574,3 +527,23 @@ void robotAction::stop()
 	this->isActive = false;
 }
 
+
+int getStatue()
+{
+	switch(nowAction)
+	{
+	case ACTION_LEFT_TO_STAND:
+	case ACTION_RIGHT_TO_STAND:
+	case ACTION_STAND_STAND:
+	case ACTION_TURN_LEFT:
+	case ACTION_TURN_RIGHT:
+		return STATUE_STAND;
+	case ACTION_STAND_TO_LEFT:
+	case ACTION_WALK_LEFT:
+		return STATUE_LEFT_AHEAD;
+	case ACTION_STAND_TO_RIGHT:
+	case ACTION_WALK_RIGHT:
+		return STATUE_RIGHT_AHEAD;
+	}
+	return STATUE_UNDEF;
+}
