@@ -17,12 +17,15 @@
 	#define NO_LINE_SIGNAL 50
 	#define NOT_LINE 255
 
-	#define ACTION_STAND 0
-	#define ACTION_FIRST_STEP 1
-	#define ACTION_WALK 2
-	#define ACTION_LEFT 3
-	#define ACTION_RIGHT 4
-	#define ACTION_STOP 5
+	#define ACTION_STAND_STAND 0
+	#define ACTION_STAND_TO_LEFT 1
+	#define ACTION_STAND_TO_RIGHT 2
+	#define ACTION_WALK_LEFT 3
+	#define ACTION_WALK_RIGHT 4
+	#define ACTION_LEFT_TO_STAND 5
+	#define ACTION_RIGHT_TO_LEFT 6
+	#define ACTION_TURN_LEFT 7
+	#define ACTION_TURN_RIGHT 8
 
 	using namespace std;
 #endif

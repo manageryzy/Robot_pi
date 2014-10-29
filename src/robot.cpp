@@ -13,12 +13,14 @@
 bool shouldCaptule = false,
 	shouldExit = false;
 
-string ImageFileName,robotStandFileName,robotGoFileName,robotWalkFileName,robotLeftFileName,robotRightFileName,robotStopFileName;
+confReader * RobotConfReader;
+
+string ImageFileName;
 int ImageFilterSize=3;
 
-int Line1X,Line2X,LineFindingError;
-int line1=0,line2=0;//两条检测线的结果
-int MaxLine1,MinLine1,MaxLine2,MinLine2;
+int Line1X,LineFindingError;
+int line1=0;//两条检测线的结果
+int MaxLine1,MinLine1;
 
 TiXmlDocument
 	robotStand,//站立
@@ -28,9 +30,25 @@ TiXmlDocument
 	robotRight,//右转步态
 	robotStop;//停止步态
 
-robotAction * actions[6];
+robotAction * actions[9];
 int nowAction;
 int nextAction;//这个只是在转向的时候使用
+
+
+int loadStep(int index,const char * conf_name)
+{
+	string filename;
+	printf("loading step file '%s'\n",conf_name);
+	filename = RobotConfReader->getConf(conf_name);
+	if(filename=="null")
+	{
+		printf("error in getting %s step\n",conf_name);
+		return 1;
+	}
+	actions[index]=new robotAction(filename);
+	printf("step file :%s loaded!",conf_name);
+	return 0;
+}
 
 /**
  * 初始化
@@ -39,10 +57,10 @@ int init()
 {
 	//----------------------------
 	//读取配置文件
-	confReader RobotConfReader("./conf/robot.conf");
+	RobotConfReader = RobotConfReader("./conf/robot.conf");
 
 #ifndef CAPTURE_FROM_WEBCAM
-	ImageFileName = RobotConfReader.getConf("image_location");
+	ImageFileName = RobotConfReader->getConf("image_location");
 	if(ImageFileName=="null")
 	{
 		puts("error in getting image_location!I Quit!");
@@ -51,56 +69,38 @@ int init()
 #endif
 
 	//设置高斯滤波大小
-	ImageFilterSize = std::atoi( RobotConfReader.getConf("image_filter_size").c_str());
-	if(RobotConfReader.getConf("image_filter_size")=="null")
+	ImageFilterSize = std::atoi( RobotConfReader->getConf("image_filter_size").c_str());
+	if(RobotConfReader->getConf("image_filter_size")=="null")
 	{
 		puts("error in getting image_filter_size");
 		ImageFilterSize=3;
 	}
 
 	//读取直线1的位置
-	Line1X = std::atoi( RobotConfReader.getConf("line1").c_str());
-	if(RobotConfReader.getConf("line1")=="null")
+	Line1X = std::atoi( RobotConfReader->getConf("line1").c_str());
+	if(RobotConfReader->getConf("line1")=="null")
 	{
 		puts("error in getting line1");
 		return 1;
 	}
-	MaxLine1 = std::atoi( RobotConfReader.getConf("maxline1").c_str());
-	if(RobotConfReader.getConf("maxline1")=="null")
+	MaxLine1 = std::atoi( RobotConfReader->getConf("maxline1").c_str());
+	if(RobotConfReader->getConf("maxline1")=="null")
 	{
 		puts("error in getting maxline1");
 		return 1;
 	}
-	MinLine1 = std::atoi( RobotConfReader.getConf("minline1").c_str());
-	if(RobotConfReader.getConf("minline1")=="null")
+	MinLine1 = std::atoi( RobotConfReader->getConf("minline1").c_str());
+	if(RobotConfReader->getConf("minline1")=="null")
 	{
 		puts("error in getting minline1");
 		return 1;
 	}
 
-	//读取直线2的位置
-	Line2X = std::atoi( RobotConfReader.getConf("line2").c_str());
-	if(RobotConfReader.getConf("line2")=="null")
-	{
-		puts("error in getting line2");
-		return 1;
-	}
-	MaxLine2 = std::atoi( RobotConfReader.getConf("maxline2").c_str());
-	if(RobotConfReader.getConf("maxline2")=="null")
-	{
-		puts("error in getting maxline2");
-		return 1;
-	}
-	MinLine2 = std::atoi( RobotConfReader.getConf("minline2").c_str());
-	if(RobotConfReader.getConf("minline2")=="null")
-	{
-		puts("error in getting minline2");
-		return 1;
-	}
 
-	//读取直线2的位置
-	LineFindingError = std::atoi( RobotConfReader.getConf("lineError").c_str());
-	if(RobotConfReader.getConf("lineError")=="null")
+
+	//读取巡线误差
+	LineFindingError = std::atoi( RobotConfReader->getConf("lineError").c_str());
+	if(RobotConfReader->getConf("lineError")=="null")
 	{
 		puts("error in getting lineError");
 		LineFindingError = 10;
@@ -111,77 +111,60 @@ int init()
 	puts("------------------------------");
 	puts("now loading step file!\n");
 
-	//站立姿态
-	puts("loading step file 'stand'");
-	robotStandFileName = RobotConfReader.getConf("stand");
-	if(robotStandFileName=="null")
+	if(loadStep(ACTION_STAND_STAND,"stand")!=0)
 	{
-		puts("error in getting stand step");
+		puts("error in read step!Quit");
 		return 1;
 	}
-	actions[ACTION_STAND]=new robotAction(robotStandFileName);
-	actions[ACTION_STAND]->setIsAutoCycle(false);
-	puts("step file :stand loaded!");
 
-	//启动步伐
-	puts("loading step file 'go'");
-	robotGoFileName = RobotConfReader.getConf("go");
-	if(robotGoFileName=="null")
+	if(loadStep(ACTION_STAND_TO_LEFT,"standToLeft")!=0)
 	{
-		puts("error in getting go step");
+		puts("error in read step!Quit");
 		return 1;
 	}
-	actions[ACTION_FIRST_STEP] = new robotAction(robotGoFileName);
-	actions[ACTION_FIRST_STEP]->setIsAutoCycle(false);
-	puts("step file :'go' loaded");
 
-	//行走步伐
-	puts("loading step file 'walk'");
-	robotWalkFileName = RobotConfReader.getConf("walk");
-	if(robotWalkFileName=="null")
+	if(loadStep(ACTION_STAND_TO_RIGHT,"standToRight")!=0)
 	{
-		puts("error in getting walk step");
+		puts("error in read step!Quit");
 		return 1;
 	}
-	actions[ACTION_WALK] = new robotAction(robotWalkFileName);
-	actions[ACTION_WALK]->setIsAutoCycle(true);
-	puts("step file :'walk' loaded");
 
-	//左转步态
-	puts("loading step file 'left'");
-	robotLeftFileName = RobotConfReader.getConf("left");
-	if(robotLeftFileName=="null")
+	if(loadStep(ACTION_WALK_LEFT,"walkLeft")!=0)
 	{
-		puts("error in getting left step");
+		puts("error in read step!Quit");
 		return 1;
 	}
-	actions[ACTION_LEFT] = new robotAction(robotLeftFileName);
-	actions[ACTION_LEFT]->setIsAutoCycle(false);
-	puts("step file :'left' loaded");
 
-	//右转步态
-	puts("loading step file 'right'");
-	robotRightFileName = RobotConfReader.getConf("right");
-	if(robotRightFileName=="null")
+	if(loadStep(ACTION_WALK_RIGHT,"walkRight")!=0)
 	{
-		puts("error in getting right step");
+		puts("error in read step!Quit");
 		return 1;
 	}
-	actions[ACTION_RIGHT] = new robotAction(robotRightFileName);
-	actions[ACTION_RIGHT]->setIsAutoCycle(false);
-	puts("step file :'right' loaded");
 
-	//停止步态
-	puts("loading step file 'stop'");
-	robotStopFileName = RobotConfReader.getConf("stop");
-	if(robotStopFileName=="null")
+	if(loadStep(ACTION_LEFT_TO_STAND,"leftToStand")!=0)
 	{
-		puts("error in getting stop step");
+		puts("error in read step!Quit");
 		return 1;
 	}
-	actions[ACTION_STOP] = new robotAction(robotStopFileName);
-	actions[ACTION_STOP]->setIsAutoCycle(false);
-	puts("step file :'stop' loaded");
+
+	if(loadStep(ACTION_RIGHT_TO_LEFT,"rightToStand")!=0)
+	{
+		puts("error in read step!Quit");
+		return 1;
+	}
+
+	if(loadStep(ACTION_TURN_LEFT,"turnLeft")!=0)
+	{
+		puts("error in read step!Quit");
+		return 1;
+	}
+
+	if(loadStep(ACTION_TURN_RIGHT,"turnRight")!=0)
+	{
+		puts("error in read step!Quit");
+		return 1;
+	}
+
 	puts("\nAll the step file has been loaded successfully!\n");
 
 
@@ -550,6 +533,17 @@ void robotAction::update()
 		return;
 	if(this->isActived)//本条动作已经激活过了
 	{
+		if(this->it == this->nodeList.end())//干掉步态动作组完成之后的那个等待
+		{
+			shouldCaptule = true;//在步态完成之后再主循环的下一次循环的时候捕获图片
+			if(this->isAutoCycle)
+			{
+				it = this->nodeList.begin();
+			}
+
+			isActive = false;
+			return ;
+		}
 		if((clock()-this->ActiveTime) > ((long)this->it->lastTime*200))
 		{
 
