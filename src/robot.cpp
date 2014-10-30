@@ -495,30 +495,50 @@ int main(int argc, char** argv )
 						#ifdef __DEBUG_STEP__
 							puts("--------:white screen---------------");
 						#endif
+//
+//						switch(getStatue())
+//						{
+//						case STATUE_STAND:
+//							actionQueue.push(ACTION_TURN_RIGHT);
+//							break;
+//						case STATUE_LEFT_AHEAD:
+//							actionQueue.push(ACTION_LEFT_TO_STAND);
+//							actionQueue.push(ACTION_TURN_RIGHT);
+//							break;
+//						case STATUE_RIGHT_AHEAD:
+//							actionQueue.push(ACTION_RIGHT_TO_STAND);
+//							actionQueue.push(ACTION_TURN_RIGHT);
+//							break;
+//						default:
+//							#ifdef __DEBUG__
+//								puts("ERROR!UNDEF STATUE!");
+//							#endif
+//							actionQueue.push(ACTION_STAND_STAND);
+//							actionQueue.push(ACTION_TURN_RIGHT);
+//							break;
+//						}
+//						actionQueue.push(ACTION_STAND_TO_RIGHT);
+//						actionQueue.push(ACTION_WALK_LEFT);
 
 						switch(getStatue())
 						{
-						case STATUE_STAND:
-							actionQueue.push(ACTION_TURN_RIGHT);
-							break;
 						case STATUE_LEFT_AHEAD:
-							actionQueue.push(ACTION_LEFT_TO_STAND);
-							actionQueue.push(ACTION_TURN_RIGHT);
+							nowAction = ACTION_WALK_RIGHT;
+							actions[nowAction]->active();
 							break;
 						case STATUE_RIGHT_AHEAD:
-							actionQueue.push(ACTION_RIGHT_TO_STAND);
-							actionQueue.push(ACTION_TURN_RIGHT);
+							nowAction = ACTION_WALK_LEFT;
+							actions[nowAction]->active();
+							break;
+						case STATUE_STAND:
+							nowAction = ACTION_STAND_TO_LEFT;
+							actions[nowAction]->active();
 							break;
 						default:
-							#ifdef __DEBUG__
-								puts("ERROR!UNDEF STATUE!");
-							#endif
-							actionQueue.push(ACTION_STAND_STAND);
-							actionQueue.push(ACTION_TURN_RIGHT);
+							nowAction = ACTION_STAND_STAND;
+							actions[nowAction]->active();
 							break;
 						}
-						actionQueue.push(ACTION_STAND_TO_RIGHT);
-						actionQueue.push(ACTION_WALK_LEFT);
 					}
 					else if(line1<MinLine1||lineK<-0.15)//左转
 					{
@@ -762,7 +782,7 @@ void robotAction::update()
 			isActive = false;
 			return ;
 		}
-		if((clock()-this->ActiveTime) > ((long)this->it->lastTime*200))
+		if((clock()-this->ActiveTime) > ((long)this->it->lastTime*100))
 		{
 
 			if(++this->it == this->nodeList.end())//步态完成
