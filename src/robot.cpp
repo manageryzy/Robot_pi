@@ -7,6 +7,7 @@
 #include "confReader.h"
 #include <pthread.h>
 #include <unistd.h>
+#include <math.h>
 
 /////////////////////////////////////////////
 //global flags
@@ -34,6 +35,11 @@ TiXmlDocument
 robotAction * actions[9];
 int nowAction;
 queue<int> actionQueue;
+
+float CalcDes(float x1,float y1,float x2,float y2,float x0,float y0)
+{
+	return abs((int)(((y2-y1)*(x0)/(x2-x1)-y0+y1-(y2-y1)*(x1)/(x2-x1))/sqrtf((y2-y1)/(x2-x1)*(y2-y1)/(x2-x1)+1)));
+}
 
 
 int loadStep(int index,const char * conf_name)
@@ -232,6 +238,8 @@ int main(int argc, char** argv )
 		*img_smooth,//滤波图像
 		*img_twovalue,//二值化图像
 		*img_canny; //canny 检测之后的图像
+	CvSeq* lines = 0;
+	CvMemStorage* storage = cvCreateMemStorage(0);
 
 	if(init()!=0)
 		exit(-1);
@@ -367,6 +375,18 @@ int main(int argc, char** argv )
 				line1 = 1024;
 				line1 = findBlackLine(img_twovalue,img_canny,img,Line1X,LineFindingError);
 				cvCircle(img,cvPoint(Line1X,line1),10,cvScalar(255,0,0,0.5));
+			}
+
+			lines = cvHoughLines2( img_canny, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 50, 50, 10 );
+			for(int i = 0; i < lines->total; i++ )
+			{
+				CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
+				if(CalcDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1)<10)
+				{
+					printf("%f\n",CalcDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1));
+					cvLine( img, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+				}
+				cvShowImage ("capture", img);
 			}
 
 			//-----------------------------
