@@ -33,6 +33,7 @@ TiXmlDocument
 	robotStop;//停止步态
 
 robotAction * actions[9];
+bool isWhiteScreen = false;
 int nowAction;
 queue<int> actionQueue;
 
@@ -352,31 +353,12 @@ int main(int argc, char** argv )
 						puts("pure white!");
 					#endif
 
-					if(actionQueue.empty())
-					{
-						switch(getStatue())
-						{
-						case STATUE_STAND:
-							actionQueue.push(ACTION_TURN_RIGHT);
-							break;
-						case STATUE_LEFT_AHEAD:
-							actionQueue.push(ACTION_LEFT_TO_STAND);
-							actionQueue.push(ACTION_TURN_RIGHT);
-							break;
-						case STATUE_RIGHT_AHEAD:
-							actionQueue.push(ACTION_RIGHT_TO_STAND);
-							actionQueue.push(ACTION_TURN_RIGHT);
-							break;
-						default:
-							#ifdef __DEBUG__
-								puts("ERROR!UNDEF STATUE!");
-							#endif
-							actionQueue.push(ACTION_STAND_STAND);
-							actionQueue.push(ACTION_TURN_RIGHT);
-							break;
-						}
-					}
+					isWhiteScreen = true;
 					autoOstu = 70;
+				}
+				else
+				{
+					isWhiteScreen = false;
 				}
 				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
 				#ifdef __DEBUG_IMG_PROC_CALL__
@@ -469,7 +451,35 @@ int main(int argc, char** argv )
 				if(captureFinished)
 				{
 					//进行步态的选择啦
-					if(line1>=MaxLine1)//左转
+					if(isWhiteScreen)
+					{
+						if(actionQueue.empty())
+						{
+							switch(getStatue())
+							{
+							case STATUE_STAND:
+								actionQueue.push(ACTION_TURN_RIGHT);
+								break;
+							case STATUE_LEFT_AHEAD:
+								actionQueue.push(ACTION_LEFT_TO_STAND);
+								actionQueue.push(ACTION_TURN_RIGHT);
+								break;
+							case STATUE_RIGHT_AHEAD:
+								actionQueue.push(ACTION_RIGHT_TO_STAND);
+								actionQueue.push(ACTION_TURN_RIGHT);
+								break;
+							default:
+								#ifdef __DEBUG__
+									puts("ERROR!UNDEF STATUE!");
+								#endif
+								actionQueue.push(ACTION_STAND_STAND);
+								actionQueue.push(ACTION_TURN_RIGHT);
+								break;
+							}
+							actionQueue.push(ACTION_STAND_TO_RIGHT);
+						}
+					}
+					else if(line1>=MaxLine1)//左转
 					{
 						switch(getStatue())
 						{
@@ -547,7 +557,7 @@ int main(int argc, char** argv )
 			}
 			else//指令队列还有指令，等待指令结束
 			{
-				puts("action group now finish!");
+				puts("action group not finish!");
 				nowAction = actionQueue.front();
 				actionQueue.pop();
 				actions[nowAction]->active();
