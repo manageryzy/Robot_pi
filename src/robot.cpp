@@ -13,7 +13,8 @@
 //global flags
 bool shouldCaptule = false,
 	shouldExit = false,
-	captureFinished = false;
+	captureFinished = false,
+	tooClose = false;
 
 confReader * RobotConfReader;
 
@@ -419,6 +420,8 @@ int main(int argc, char** argv )
 				}
 			}
 
+			tooClose = isToolClose(img,Line1X);
+
 			//-----------------------------
 			//显示图像
 			#ifdef SHOW_GUI
@@ -457,7 +460,31 @@ int main(int argc, char** argv )
 				{
 					captureFinished =false;
 					//进行步态的选择啦
-					if(isWhiteScreen)
+					if(tooClose)
+					{
+						#ifdef __DEBUG_STEP__
+							puts("danger**************");
+						#endif
+						switch(getStatue())
+						{
+						case STATUE_LEFT_AHEAD:
+							actionQueue.push(ACTION_LEFT_TO_STAND);
+							break;
+						case STATUE_RIGHT_AHEAD:
+							actionQueue.push(ACTION_RIGHT_TO_STAND);
+							break;
+						case STATUE_STAND:break;
+						default:
+							#ifdef __DEBUG__
+								puts("UNKONW STATUE");
+							#endif
+							actionQueue.push(ACTION_STAND_STAND);
+							break;
+						}
+						actionQueue.push(ACTION_TURN_LEFT);
+						actionQueue.push(ACTION_TURN_LEFT);
+					}
+					else if(isWhiteScreen)
 					{
 						#ifdef __DEBUG_STEP__
 							puts("if(isWhiteScreen)");
@@ -486,11 +513,12 @@ int main(int argc, char** argv )
 						}
 						actionQueue.push(ACTION_STAND_TO_RIGHT);
 					}
-					else if(line1>=MaxLine1||lineK>0.15)//左转
+					else if(line1<MinLine1||lineK<-0.15)//左转
 					{
 						#ifdef __DEBUG_STEP__
-							puts("else if(line1>=MaxLine1||lineK>0.15)");
+							puts("else if(line1<MinLine1||lineK<-0.15)");
 						#endif
+
 						switch(getStatue())
 						{
 						case STATUE_LEFT_AHEAD:
@@ -510,10 +538,10 @@ int main(int argc, char** argv )
 						actionQueue.push(ACTION_TURN_LEFT);
 						actionQueue.push(ACTION_TURN_LEFT);
 					}
-					else if(line1<MinLine1||lineK<-0.15)//右转
+					else if(line1>=MaxLine1||lineK>0.15)//右转
 					{
 						#ifdef __DEBUG_STEP__
-							puts("else if(line1<MinLine1||lineK<-0.15)");
+							puts("else if(line1>=MaxLine1||lineK>0.15)");
 						#endif
 						switch(getStatue())
 						{

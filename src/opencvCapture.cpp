@@ -348,3 +348,22 @@ const int findBlackLine(const IplImage *twoValue,const IplImage *sobel,IplImage 
 	}
 	return ret;
 }
+
+
+bool isToolClose(const IplImage *twoValue,int lineX)
+{
+	int whiteCount=0;
+
+	uchar* dataTwoValu = (uchar*)twoValue->imageData;
+
+	for(int i = 0; i < twoValue->height; i++)
+	{
+		uchar twoValuePix = dataTwoValu[i * twoValue->width + lineX];
+		if(twoValuePix!=0)
+			whiteCount++;
+	}
+	if(whiteCount/twoValue->height<0.6)
+		return true;
+	else
+		return false;
+}
