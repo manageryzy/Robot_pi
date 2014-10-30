@@ -37,6 +37,8 @@ bool isWhiteScreen = false;
 int nowAction;
 queue<int> actionQueue;
 
+float lineK = 0;
+
 int CalcDes(float x1,float y1,float x2,float y2,float x0,float y0)
 {
 	return abs((int)(((y2-y1)*(x0)/(x2-x1)-y0+y1-(y2-y1)*(x1)/(x2-x1))/sqrtf((y2-y1)/(x2-x1)*(y2-y1)/(x2-x1)+1)));
@@ -396,6 +398,7 @@ int main(int argc, char** argv )
 			}
 
 			lines = cvHoughLines2( img_canny, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 50, 50, 10 );
+			lineK = 0;
 			for(int i = 0; i < lines->total; i++ )
 			{
 				CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
@@ -410,6 +413,8 @@ int main(int argc, char** argv )
 						#ifdef SHOW_GUI
 							cvLine( img, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
 						#endif
+
+						lineK = (float)(line[0].y-line[1].y)/(line[0].x-line[1].y);
 					}
 				}
 			}
@@ -450,37 +455,42 @@ int main(int argc, char** argv )
 				#endif
 				if(captureFinished)
 				{
+					captureFinished =false;
 					//进行步态的选择啦
 					if(isWhiteScreen)
 					{
-						if(actionQueue.empty())
+						#ifdef __DEBUG_STEP__
+							puts("if(isWhiteScreen)");
+						#endif
+
+						switch(getStatue())
 						{
-							switch(getStatue())
-							{
-							case STATUE_STAND:
-								actionQueue.push(ACTION_TURN_RIGHT);
-								break;
-							case STATUE_LEFT_AHEAD:
-								actionQueue.push(ACTION_LEFT_TO_STAND);
-								actionQueue.push(ACTION_TURN_RIGHT);
-								break;
-							case STATUE_RIGHT_AHEAD:
-								actionQueue.push(ACTION_RIGHT_TO_STAND);
-								actionQueue.push(ACTION_TURN_RIGHT);
-								break;
-							default:
-								#ifdef __DEBUG__
-									puts("ERROR!UNDEF STATUE!");
-								#endif
-								actionQueue.push(ACTION_STAND_STAND);
-								actionQueue.push(ACTION_TURN_RIGHT);
-								break;
-							}
-							actionQueue.push(ACTION_STAND_TO_RIGHT);
+						case STATUE_STAND:
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						case STATUE_LEFT_AHEAD:
+							actionQueue.push(ACTION_LEFT_TO_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						case STATUE_RIGHT_AHEAD:
+							actionQueue.push(ACTION_RIGHT_TO_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
+						default:
+							#ifdef __DEBUG__
+								puts("ERROR!UNDEF STATUE!");
+							#endif
+							actionQueue.push(ACTION_STAND_STAND);
+							actionQueue.push(ACTION_TURN_RIGHT);
+							break;
 						}
+						actionQueue.push(ACTION_STAND_TO_RIGHT);
 					}
-					else if(line1>=MaxLine1)//左转
+					else if(line1>=MaxLine1||lineK>0.15)//左转
 					{
+						#ifdef __DEBUG_STEP__
+							puts("else if(line1>=MaxLine1||lineK>0.15)");
+						#endif
 						switch(getStatue())
 						{
 						case STATUE_LEFT_AHEAD:
@@ -498,10 +508,13 @@ int main(int argc, char** argv )
 							break;
 						}
 						actionQueue.push(ACTION_TURN_LEFT);
-						actionQueue.push(ACTION_STAND_TO_LEFT);
+						actionQueue.push(ACTION_TURN_LEFT);
 					}
-					else if(line1<MinLine1)//右转
+					else if(line1<MinLine1||lineK<-0.15)//右转
 					{
+						#ifdef __DEBUG_STEP__
+							puts("else if(line1<MinLine1||lineK<-0.15)");
+						#endif
 						switch(getStatue())
 						{
 						case STATUE_STAND:
@@ -528,6 +541,9 @@ int main(int argc, char** argv )
 					else
 					{
 						//根据当前状态继续步态
+						#ifdef __DEBUG_STEP__
+							puts("else");
+						#endif
 						switch(getStatue())
 						{
 						case STATUE_LEFT_AHEAD:
