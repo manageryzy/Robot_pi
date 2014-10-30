@@ -1,12 +1,6 @@
 <?xml version="1.0" standalone="yes"?>
 <NewDataSet>
   <Table1>
-    <ID>1</ID>
-    <Move> #0 P1175 #1 P1160 #2 P1490 #13 P1460 #14 P1200 #15 P1350</Move>
-    <Time> T500</Time>
-    <position> POS0X=491Y=95 POS1X=491Y=214 POS2X=491Y=333 POS13X=635Y=338 POS14X=637Y=208 POS15X=630Y=92</position>
-  </Table1>
-  <Table1>
     <ID>2</ID>
     <Move> #0 P1175 #1 P1160 #2 P1165 #13 P1330 #14 P1200 #15 P1350</Move>
     <Time> T500</Time>

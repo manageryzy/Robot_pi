@@ -7,6 +7,7 @@
 #include "confReader.h"
 #include <pthread.h>
 #include <unistd.h>
+#include <wiringPi.h>
 #include <math.h>
 
 /////////////////////////////////////////////
@@ -278,6 +279,11 @@ int main(int argc, char** argv )
 		puts("init finished!");
 	#endif
 
+	while(digitalRead(1)==0)//等待开关被触发
+	{
+		sleep(1);
+	}
+
 	while (1)
 	{
 		if(shouldCaptule)
@@ -460,10 +466,10 @@ int main(int argc, char** argv )
 				{
 					captureFinished =false;
 					//进行步态的选择啦
-					if(tooClose)
+					if(tooClose)//过于靠近黑线，危险
 					{
 						#ifdef __DEBUG_STEP__
-							puts("danger**************");
+							puts("danger*****************************");
 						#endif
 						switch(getStatue())
 						{
@@ -484,10 +490,10 @@ int main(int argc, char** argv )
 						actionQueue.push(ACTION_TURN_LEFT);
 						actionQueue.push(ACTION_TURN_LEFT);
 					}
-					else if(isWhiteScreen)
+					else if(isWhiteScreen)//白屏被认定
 					{
 						#ifdef __DEBUG_STEP__
-							puts("if(isWhiteScreen)");
+							puts("--------:white screen---------------");
 						#endif
 
 						switch(getStatue())
@@ -512,11 +518,12 @@ int main(int argc, char** argv )
 							break;
 						}
 						actionQueue.push(ACTION_STAND_TO_RIGHT);
+						actionQueue.push(ACTION_WALK_LEFT);
 					}
 					else if(line1<MinLine1||lineK<-0.15)//左转
 					{
 						#ifdef __DEBUG_STEP__
-							puts("else if(line1<MinLine1||lineK<-0.15)");
+							puts("--------:turn left------------------");
 						#endif
 
 						switch(getStatue())
@@ -541,7 +548,7 @@ int main(int argc, char** argv )
 					else if(line1>=MaxLine1||lineK>0.15)//右转
 					{
 						#ifdef __DEBUG_STEP__
-							puts("else if(line1>=MaxLine1||lineK>0.15)");
+							puts("--------:turn right-----------------");
 						#endif
 						switch(getStatue())
 						{
@@ -570,7 +577,7 @@ int main(int argc, char** argv )
 					{
 						//根据当前状态继续步态
 						#ifdef __DEBUG_STEP__
-							puts("else");
+							puts("--------:walk------------------");
 						#endif
 						switch(getStatue())
 						{
