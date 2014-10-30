@@ -15,10 +15,18 @@
 	#define __INCLUDED__
 
 	//下面的是一些开关
-	#define SHOW_GUI
-	//#define __DEBUG__
-	#define CAPTURE_FROM_WEBCAM
+	#define __DEBUG__
+	#ifdef __DEBUG__
+		#define SHOW_GUI
+		#define __DEBUG_SERIAL__
+		#define __DEBUG_ACTION_LOAD__
+		#define __DEBUG_INIT__
+		#define __DEBUG_IMG_PROC__
+		#define __DEBUG_IMG_PROC_CALL__
+		#define __DEBUG_STEP__
+	#endif
 
+	#define CAPTURE_FROM_WEBCAM
 	#define BLACK_LINE_SIGNAL 127 /*这个是在二值图中检测用的，请不要在二值图中自然的出现这个数值*/
 	#define NO_LINE_SIGNAL 50
 	#define NOT_LINE 255

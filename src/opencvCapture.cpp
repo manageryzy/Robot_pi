@@ -333,9 +333,13 @@ const int findBlackLine(const IplImage *twoValue,const IplImage *sobel,IplImage 
 				}
 				else
 				{
-					puts("error signal");
-					cvCircle(img,cvPoint(j,i),10,cvScalar(0,255,0,0.5),1, 8, 0);
-					printf("b:%d w:%d x:%d y:%d\n",blackCount,whiteCount,j,i);
+					#ifdef __DEBUG_IMG_PROC__
+						puts("error signal");
+						printf("b:%d w:%d x:%d y:%d\n",blackCount,whiteCount,j,i);
+						#ifdef SHOW_GUI
+							cvCircle(img,cvPoint(j,i),10,cvScalar(0,255,0,0.5),1, 8, 0);
+						#endif
+					#endif
 				}
 			}
 

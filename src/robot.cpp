@@ -36,7 +36,7 @@ robotAction * actions[9];
 int nowAction;
 queue<int> actionQueue;
 
-float CalcDes(float x1,float y1,float x2,float y2,float x0,float y0)
+int CalcDes(float x1,float y1,float x2,float y2,float x0,float y0)
 {
 	return abs((int)(((y2-y1)*(x0)/(x2-x1)-y0+y1-(y2-y1)*(x1)/(x2-x1))/sqrtf((y2-y1)/(x2-x1)*(y2-y1)/(x2-x1)+1)));
 }
@@ -45,7 +45,9 @@ float CalcDes(float x1,float y1,float x2,float y2,float x0,float y0)
 int loadStep(int index,const char * conf_name)
 {
 	string filename;
-	printf("loading step file '%s'\n",conf_name);
+	#ifdef __DEBUG_ACTION_LOAD__
+		printf("loading step file '%s'\n",conf_name);
+	#endif
 	filename = RobotConfReader->getConf(conf_name);
 	if(filename=="null")
 	{
@@ -53,7 +55,9 @@ int loadStep(int index,const char * conf_name)
 		return 1;
 	}
 	actions[index]=new robotAction(filename);
-	printf("step file :%s loaded!",conf_name);
+	#ifdef __DEBUG_ACTION_LOAD__
+		printf("step file :%s loaded!",conf_name);
+	#endif
 	return 0;
 }
 
@@ -66,14 +70,14 @@ int init()
 	//读取配置文件
 	RobotConfReader = new confReader("./conf/robot.conf");
 
-#ifndef CAPTURE_FROM_WEBCAM
-	ImageFileName = RobotConfReader->getConf("image_location");
-	if(ImageFileName=="null")
-	{
-		puts("error in getting image_location!I Quit!");
-		return 1;
-	}
-#endif
+	#ifndef CAPTURE_FROM_WEBCAM
+		ImageFileName = RobotConfReader->getConf("image_location");
+		if(ImageFileName=="null")
+		{
+			puts("error in getting image_location!I Quit!");
+			return 1;
+		}
+	#endif
 
 	//设置高斯滤波大小
 	ImageFilterSize = std::atoi( RobotConfReader->getConf("image_filter_size").c_str());
@@ -115,8 +119,10 @@ int init()
 
 	//------------------------------
 	//读取步态文件
-	puts("------------------------------");
-	puts("now loading step file!\n");
+	#ifdef __DEBUG_INIT__
+		puts("------------------------------");
+		puts("now loading step file!\n");
+	#endif
 
 	if(loadStep(ACTION_STAND_STAND,"stand")!=0)
 	{
@@ -171,9 +177,9 @@ int init()
 		puts("error in read step!Quit");
 		return 1;
 	}
-
-	puts("\nAll the step file has been loaded successfully!\n");
-
+	#ifdef __DEBUG_INIT__
+		puts("\nAll the step file has been loaded successfully!\n");
+	#endif
 
 
 	//-----------------------------------
@@ -198,10 +204,10 @@ int init()
 	}
 
 	//根据编译开关打开窗口
-#ifdef SHOW_GUI
-	cvNamedWindow("capture", CV_WINDOW_AUTOSIZE);
-	puts("created window capture");
-#endif
+	#ifdef SHOW_GUI
+		cvNamedWindow("capture", CV_WINDOW_AUTOSIZE);
+		puts("created window capture");
+	#endif
 
 	shouldCaptule = true;
 	nowAction = ACTION_STAND_STAND;
@@ -223,10 +229,10 @@ void release()
 	opencvCaptureClose();
 
 	//关闭窗口
-#ifdef SHOW_GUI
-	cvDestroyWindow("capture");
-	puts("destroied window capture");
-#endif
+	#ifdef SHOW_GUI
+		cvDestroyWindow("capture");
+		puts("destroied window capture");
+	#endif
 
 }
 
@@ -244,7 +250,9 @@ int main(int argc, char** argv )
 	if(init()!=0)
 		exit(-1);
 
-	puts("init finished!");
+	#ifdef __DEBUG_INIT__
+		puts("init finished!");
+	#endif
 
 	while (1)
 	{
@@ -260,7 +268,7 @@ int main(int argc, char** argv )
 			#endif
 
 			#ifdef __DEBUG__
-				puts("captured!");
+				puts("pic captured!");
 			#endif
 
 //			img_gray=cvCloneImage(img);
@@ -273,13 +281,13 @@ int main(int argc, char** argv )
 			{
 				//创建灰度图像
 				img_gray=cvCreateImage(cvGetSize(img),img->depth,1);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("img_gray=cvCreateImage(cvGetSize(img),img->depth,1);");
 				#endif
 
 				//色彩空间转换
 				cvCvtColor(img,img_gray,CV_RGB2GRAY);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("cvCvtColor(img,img_gray,CV_RGB2GRAY);");
 				#endif
 			}
@@ -289,13 +297,13 @@ int main(int argc, char** argv )
 			{
 				//创建smooth的图像
 				img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);");
 				#endif
 
 				//进行平滑滤波
 				cvSmooth(img_gray,img_smooth,CV_GAUSSIAN,ImageFilterSize,0,0,0);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("cvSmooth(img_gray,img_smooth);");
 				#endif
 			}
@@ -305,12 +313,12 @@ int main(int argc, char** argv )
 			{
 				//创建二值化图像
 				img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);");
 				#endif
 
 				int autoOstu = otsu(img_gray);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("int autoOstu = otsu(img_gray);");
 				#endif
 
@@ -343,7 +351,7 @@ int main(int argc, char** argv )
 					autoOstu = 70;
 				}
 				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					printf("cvThreshold(img_smooth,img_twovalue,%d,150,CV_THRESH_BINARY);\n",autoOstu);
 				#endif
 
@@ -359,13 +367,13 @@ int main(int argc, char** argv )
 			{
 				//创建canny变换的图像
 				img_canny = cvCreateImage(cvGetSize(img),img->depth,1);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
 				#endif
 
 				//进行变换
 				cvCanny(img_gray,img_canny,30,50,3);
-				#ifdef __DEBUG__
+				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("cvCanny(img_gray,img_canny,30,50,3);");
 				#endif
 			}
@@ -383,18 +391,19 @@ int main(int argc, char** argv )
 				CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
 				if(CalcDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1)<10)
 				{
-					printf("%f\n",CalcDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1));
-					cvLine( img, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+					#ifdef __DEBUG_IMG_PROC__
+						printf("%f\n",CalcDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1));
+						#ifdef SHOW_GUI
+							cvLine( img, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+						#endif
+					#endif
 				}
-				cvShowImage ("capture", img);
 			}
 
 			//-----------------------------
 			//显示图像
 			#ifdef SHOW_GUI
-				#ifdef __DEBUG__
-					puts("show captured!");
-				#endif
+				puts("show captured!");
 				cvShowImage ("capture", img);
 			#endif
 
@@ -416,10 +425,15 @@ int main(int argc, char** argv )
 		actions[nowAction]->update();
 		if(!actions[nowAction]->getIsActive())//查询步态是否完成
 		{
-			puts("step finish!");
+			#ifdef __DEBUG_STEP__
+				puts("step finish!");
+			#endif
+
 			if(actionQueue.empty())
 			{
-				puts("new action group");
+				#ifdef __DEBUG_STEP__
+					puts("new action group");
+				#endif
 				if(captureFinished)
 				{
 					//进行步态的选择啦
@@ -435,7 +449,9 @@ int main(int argc, char** argv )
 							break;
 						case STATUE_STAND:break;
 						default:
-							puts("UNKONW STATUE");
+							#ifdef __DEBUG__
+								puts("UNKONW STATUE");
+							#endif
 							actionQueue.push(ACTION_STAND_STAND);
 							break;
 						}
@@ -458,7 +474,9 @@ int main(int argc, char** argv )
 							actionQueue.push(ACTION_TURN_RIGHT);
 							break;
 						default:
-							puts("ERROR!UNDEF STATUE!");
+							#ifdef __DEBUG__
+								puts("ERROR!UNDEF STATUE!");
+							#endif
 							actionQueue.push(ACTION_STAND_STAND);
 							actionQueue.push(ACTION_TURN_RIGHT);
 							break;
@@ -502,11 +520,39 @@ int main(int argc, char** argv )
 				actionQueue.pop();
 				actions[nowAction]->active();
 			}
-			printf("%d\n",nowAction);
+			#ifdef __DEBUG_STEP__
+				switch(nowAction)
+				{
+				case ACTION_LEFT_TO_STAND:
+					puts("ACTION_LEFT_TO_STAND");
+					break;
+				case ACTION_RIGHT_TO_STAND:
+					puts("ACTION_RIGHT_TO_STAND");
+					break;
+				case ACTION_STAND_STAND:
+					puts("ACTION_STAND_STAND");
+					break;
+				case ACTION_STAND_TO_LEFT:
+					puts("ACTION_STAND_TO_LEFT");
+					break;
+				case ACTION_STAND_TO_RIGHT:
+					puts("ACTION_STAND_TO_RIGHT");
+					break;
+				case ACTION_TURN_LEFT:
+					puts("ACTION_TURN_LEFT");
+					break;
+				case ACTION_TURN_RIGHT:
+					puts("ACTION_TURN_RIGHT");
+					break;
+				case ACTION_WALK_LEFT:
+					puts("ACTION_WALK_LEFT");
+					break;
+				case ACTION_WALK_RIGHT:
+					puts("ACTION_WALK_RIGHT");
+					break;
+				}
+			#endif
 		}
-
-
-
 
 		if (cvWaitKey(1) == 27 || shouldExit)
 			break;
