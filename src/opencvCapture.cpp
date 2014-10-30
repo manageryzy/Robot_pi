@@ -362,7 +362,7 @@ bool isToolClose(const IplImage *twoValue,int lineX)
 		if(twoValuePix!=0)
 			whiteCount++;
 	}
-	if(whiteCount/twoValue->height<0.6)
+	if(whiteCount/twoValue->height<0.4)
 		return true;
 	else
 		return false;

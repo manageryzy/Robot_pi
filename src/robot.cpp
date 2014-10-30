@@ -113,19 +113,19 @@ int init()
 	}
 
 	//读取直线1的位置
-	Line1X = std::atoi( RobotConfReader->getConf("line1").c_str());
+	Line1X = std::atoi( RobotConfReader->getConf("line1").c_str())/4;
 	if(RobotConfReader->getConf("line1")=="null")
 	{
 		puts("error in getting line1");
 		return 1;
 	}
-	MaxLine1 = std::atoi( RobotConfReader->getConf("maxline1").c_str());
+	MaxLine1 = std::atoi( RobotConfReader->getConf("maxline1").c_str())/4;
 	if(RobotConfReader->getConf("maxline1")=="null")
 	{
 		puts("error in getting maxline1");
 		return 1;
 	}
-	MinLine1 = std::atoi( RobotConfReader->getConf("minline1").c_str());
+	MinLine1 = std::atoi( RobotConfReader->getConf("minline1").c_str())/4;
 	if(RobotConfReader->getConf("minline1")=="null")
 	{
 		puts("error in getting minline1");
@@ -135,7 +135,7 @@ int init()
 
 
 	//读取巡线误差
-	LineFindingError = std::atoi( RobotConfReader->getConf("lineError").c_str());
+	LineFindingError = std::atoi( RobotConfReader->getConf("lineError").c_str())/4;
 	if(RobotConfReader->getConf("lineError")=="null")
 	{
 		puts("error in getting lineError");
@@ -231,6 +231,7 @@ int init()
 	//根据编译开关打开窗口
 	#ifdef SHOW_GUI
 		cvNamedWindow("capture", CV_WINDOW_AUTOSIZE);
+		cvNamedWindow("two", CV_WINDOW_AUTOSIZE);
 		puts("created window capture");
 	#endif
 
@@ -256,6 +257,7 @@ void release()
 	//关闭窗口
 	#ifdef SHOW_GUI
 		cvDestroyWindow("capture");
+		cvDestroyWindow("two");
 		puts("destroied window capture");
 	#endif
 
@@ -264,7 +266,9 @@ void release()
 int main(int argc, char** argv )
 {
 
-	IplImage *img, //原始图像
+	IplImage
+		*img_raw,//缩放之前的图像
+		*img, //原始图像
 		*img_gray, //灰度图像
 		*img_smooth,//滤波图像
 		*img_twovalue,//二值化图像
@@ -291,11 +295,14 @@ int main(int argc, char** argv )
 			shouldCaptule = false;
 
 			#ifdef CAPTURE_FROM_WEBCAM
-				img = myCaptureImage();
+				img_raw = myCaptureImage();
 			#else
 				puts(ImageFileName.c_str());
-				img = cvLoadImage(ImageFileName.c_str(),-1);
+				img_raw = cvLoadImage(ImageFileName.c_str(),-1);
 			#endif
+
+			img = cvCreateImage(cvSize(cvGetSize(img_raw).width/4,cvGetSize(img_raw).height/4),img_raw->depth,3);
+			cvResize(img_raw,img);
 
 			#ifdef __DEBUG_IMG_PROC__
 				puts("pic captured!");
@@ -355,6 +362,8 @@ int main(int argc, char** argv )
 				#ifdef __DEBUG_IMG_PROC__
 					printf("ostu = %d\n",autoOstu);
 				#endif
+
+				autoOstu = 90;
 
 				if(autoOstu > 110)
 				{
@@ -433,10 +442,12 @@ int main(int argc, char** argv )
 			#ifdef SHOW_GUI
 				puts("show captured!");
 				cvShowImage ("capture", img);
+				cvShowImage ("two", img_twovalue);
 			#endif
 
 			//-----------------------------
 			//垃圾回收
+			cvReleaseImage(&img_raw);
 			cvReleaseImage(&img);
 			cvReleaseImage(&img_gray);
 			cvReleaseImage(&img_smooth);
@@ -520,10 +531,18 @@ int main(int argc, char** argv )
 						actionQueue.push(ACTION_STAND_TO_RIGHT);
 						actionQueue.push(ACTION_WALK_LEFT);
 					}
-					else if(line1<MinLine1||lineK<-0.15)//左转
+					else if(/*line1<MinLine1||*/lineK<-0.15)//左转
 					{
 						#ifdef __DEBUG_STEP__
 							puts("--------:turn left------------------");
+							if(line1<MinLine1)
+							{
+								puts("line1<MinLine1");
+							}
+							else
+							{
+								puts("lineK<-0.15");
+							}
 						#endif
 
 						switch(getStatue())
@@ -545,10 +564,18 @@ int main(int argc, char** argv )
 						actionQueue.push(ACTION_TURN_LEFT);
 						actionQueue.push(ACTION_TURN_LEFT);
 					}
-					else if(line1>=MaxLine1||lineK>0.15)//右转
+					else if(/*line1>=MaxLine1||*/lineK>0.15)//右转
 					{
 						#ifdef __DEBUG_STEP__
 							puts("--------:turn right-----------------");
+							if(line1>=MaxLine1)
+							{
+								puts("line1>=MaxLine1");
+							}
+							else
+							{
+								puts("lineK>0.15");
+							}
 						#endif
 						switch(getStatue())
 						{
