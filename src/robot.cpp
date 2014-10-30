@@ -41,6 +41,26 @@ int CalcDes(float x1,float y1,float x2,float y2,float x0,float y0)
 	return abs((int)(((y2-y1)*(x0)/(x2-x1)-y0+y1-(y2-y1)*(x1)/(x2-x1))/sqrtf((y2-y1)/(x2-x1)*(y2-y1)/(x2-x1)+1)));
 }
 
+int pointDes(float x1,float y1,float x2,float y2)
+{
+	return (int)sqrtf((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+}
+
+int minDes(float x1,float y1,float x2,float y2,float x0,float y0)
+{
+	int des1 = pointDes(x1,y1,x0,y0);
+	int des2 = pointDes(x2,y2,x0,y0);
+	int linePointDes = CalcDes(x1,y1,x2,y2,x0,y0);
+	int minDes = des1<des2?des1:des2;
+	if(minDes<linePointDes)
+	{
+		return 255;/*抛弃这个点*/
+	}
+	else
+		return linePointDes;
+
+}
+
 
 int loadStep(int index,const char * conf_name)
 {
@@ -56,7 +76,7 @@ int loadStep(int index,const char * conf_name)
 	}
 	actions[index]=new robotAction(filename);
 	#ifdef __DEBUG_ACTION_LOAD__
-		printf("step file :%s loaded!",conf_name);
+		printf("step file :%s loaded!\n",filename.c_str());
 	#endif
 	return 0;
 }
@@ -267,7 +287,7 @@ int main(int argc, char** argv )
 				img = cvLoadImage(ImageFileName.c_str(),-1);
 			#endif
 
-			#ifdef __DEBUG__
+			#ifdef __DEBUG_IMG_PROC__
 				puts("pic captured!");
 			#endif
 
@@ -322,10 +342,16 @@ int main(int argc, char** argv )
 					puts("int autoOstu = otsu(img_gray);");
 				#endif
 
-				printf("ostu = %d\n",autoOstu);
+				#ifdef __DEBUG_IMG_PROC__
+					printf("ostu = %d\n",autoOstu);
+				#endif
+
 				if(autoOstu > 110)
 				{
-					puts("pure white!");
+					#ifdef __DEBUG_IMG_PROC__
+						puts("pure white!");
+					#endif
+
 					if(actionQueue.empty())
 					{
 						switch(getStatue())
@@ -342,7 +368,9 @@ int main(int argc, char** argv )
 							actionQueue.push(ACTION_TURN_RIGHT);
 							break;
 						default:
-							puts("ERROR!UNDEF STATUE!");
+							#ifdef __DEBUG__
+								puts("ERROR!UNDEF STATUE!");
+							#endif
 							actionQueue.push(ACTION_STAND_STAND);
 							actionQueue.push(ACTION_TURN_RIGHT);
 							break;
@@ -389,14 +417,18 @@ int main(int argc, char** argv )
 			for(int i = 0; i < lines->total; i++ )
 			{
 				CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
-				if(CalcDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1)<10)
+				if(line[0].x!=line[1].x)
 				{
-					#ifdef __DEBUG_IMG_PROC__
-						printf("%f\n",CalcDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1));
+					if(minDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1)<10)
+					{
+						#ifdef __DEBUG_IMG_PROC__
+							printf("%f\n",CalcDes(line[0].x,line[0].y,line[1].x,line[1].y,Line1X,line1));
+						#endif
+
 						#ifdef SHOW_GUI
 							cvLine( img, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
 						#endif
-					#endif
+					}
 				}
 			}
 
