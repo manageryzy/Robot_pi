@@ -431,19 +431,27 @@ int main(int argc, char** argv )
 							cvLine( img, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
 						#endif
 
-						lineK = (float)(line[0].y-line[1].y)/(line[0].x-line[1].y);
+						lineK = (float)(line[0].y-line[1].y)/(line[0].x-line[1].x);
 					}
 				}
 			}
 
 			isWhiteScreen = false;
 			tooClose = false;
-			float per = (float)isTooClose(img_twovalue,Line1X)/img->height;
-			if(per>0.95)isWhiteScreen = true;
-			if(per<0.3)tooClose = true;
+			float per = (float)4*isTooClose(img_gray,Line1X)/(img->height*img->width);
+			if(per>0.9)isWhiteScreen = true;
+
 			#ifdef __DEBUG_IMG_PROC__
-				printf("per:%f \n",per);
+				printf("per1:%f ",per);
 			#endif
+
+			per = (float)isTooCloseB(img_twovalue)/(img->width);
+			if(per<0.6)tooClose = true;
+
+			#ifdef __DEBUG_IMG_PROC__
+				printf("per2:%f\n",per);
+			#endif
+
 			//-----------------------------
 			//显示图像
 			#ifdef SHOW_GUI
@@ -484,7 +492,7 @@ int main(int argc, char** argv )
 				{
 					captureFinished =false;
 					//进行步态的选择啦
-					if(tooClose)//过于靠近黑线，危险
+					if(tooClose&&line1<10)//过于靠近黑线，危险
 					{
 						#ifdef __DEBUG_STEP__
 							puts("danger*****************************");
@@ -538,17 +546,18 @@ int main(int argc, char** argv )
 						actionQueue.push(ACTION_STAND_TO_RIGHT);
 						actionQueue.push(ACTION_WALK_LEFT);
 					}
-					else if(/*line1<MinLine1||*/lineK<-0.15)//左转
+					else if(line1>=MaxLine1||/**/lineK<-0.3)//左转
 					{
 						#ifdef __DEBUG_STEP__
 							puts("--------:turn left------------------");
+							printf("line k: %f",lineK);
 							if(line1<MinLine1)
 							{
-								puts("line1<MinLine1");
+								puts("line1>=MaxLine1||");
 							}
 							else
 							{
-								puts("lineK<-0.15");
+								puts("lineK<-0.3");
 							}
 						#endif
 
@@ -569,19 +578,19 @@ int main(int argc, char** argv )
 							break;
 						}
 						actionQueue.push(ACTION_TURN_LEFT);
-						actionQueue.push(ACTION_TURN_LEFT);
 					}
-					else if(/*line1>=MaxLine1||*/lineK>0.15)//右转
+					else if(/*line1<MinLine1||*/lineK>0.3)//右转
 					{
 						#ifdef __DEBUG_STEP__
 							puts("--------:turn right-----------------");
+							printf("line k: %f",lineK);
 							if(line1>=MaxLine1)
 							{
-								puts("line1>=MaxLine1");
+								puts("line1<MinLine1");
 							}
 							else
 							{
-								puts("lineK>0.15");
+								puts("lineK>0.3");
 							}
 						#endif
 						switch(getStatue())

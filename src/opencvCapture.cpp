@@ -356,14 +356,34 @@ int isTooClose(const IplImage *twoValue,int lineX)
 
 	uchar* dataTwoValu = (uchar*)twoValue->imageData;
 
-	for(int i = 0; i < twoValue->height; i++)
+	for(int i = 0; i < twoValue->height-1; i+=2)
 	{
-		uchar twoValuePix = dataTwoValu[i * twoValue->width + lineX];
-		if(twoValuePix>50)
-			whiteCount++;
+		for(int j = 0;j < twoValue->width-1;j+=2)
+		{
+			uchar twoValuePix = dataTwoValu[i * twoValue->width + j];
+			if(twoValuePix>30)
+				whiteCount++;
+		}
 	}
 
 	return whiteCount;
 }
 
+int isTooCloseB(const IplImage *twoValue)
+{
+	int whiteCount=0;
 
+	uchar* dataTwoValu = (uchar*)twoValue->imageData;
+
+	int i = twoValue->height-1;
+
+	for(int j = 0;j < twoValue->width;j++)
+	{
+		uchar twoValuePix = dataTwoValu[i * twoValue->width + j];
+		if(twoValuePix>30)
+			whiteCount++;
+	}
+
+
+	return whiteCount;
+}

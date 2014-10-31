@@ -77,3 +77,4 @@ void opencvCaptureClose();
 int otsu(const IplImage *src_image); //大津法求阈值
 const int findBlackLine(const IplImage *twoValue,const IplImage *sobel,IplImage *img,int lineX,int errorSize = 10);
 int isTooClose(const IplImage *twoValue,int lineX);
+int isTooCloseB(const IplImage *twoValue);
