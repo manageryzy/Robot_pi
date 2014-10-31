@@ -20,6 +20,12 @@
   </Table1>
   <Table1>
     <ID>5</ID>
+    <Move> #0 P1565 #1 P1630 #2 P1280 #13 P1550 #14 P1690 #15 P1770</Move>
+    <Time> T500</Time>
+    <position> POS0X=491Y=95 POS1X=491Y=214 POS2X=491Y=333 POS13X=279Y=334 POS14X=280Y=217 POS15X=284Y=90</position>
+  </Table1>
+  <Table1>
+    <ID>6</ID>
     <Move> #0 P1400 #1 P1390 #2 P1490 #13 P1460 #14 P1420 #15 P1580</Move>
     <Time> T500</Time>
     <position> POS0X=491Y=95 POS1X=491Y=214 POS2X=491Y=333 POS13X=635Y=338 POS14X=637Y=208 POS15X=630Y=92</position>
