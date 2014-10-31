@@ -805,7 +805,7 @@ void robotAction::update()
 			isActive = false;
 			return ;
 		}
-		if((clock()-this->ActiveTime) > ((long)this->it->lastTime*200))
+		if((clock()-this->ActiveTime) > ((long)this->it->lastTime*150))
 		{
 
 			if(++this->it == this->nodeList.end())//步态完成

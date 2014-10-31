@@ -18,11 +18,11 @@
 	#define __DEBUG__
 	#ifdef __DEBUG__
 		#define SHOW_GUI
-		#define __DEBUG_SERIAL__
+		//#define __DEBUG_SERIAL__
 		#define __DEBUG_ACTION_LOAD__
 		#define __DEBUG_INIT__
 		#define __DEBUG_IMG_PROC__
-		#define __DEBUG_IMG_PROC_CALL__
+		//#define __DEBUG_IMG_PROC_CALL__
 		#define __DEBUG_STEP__
 	#endif
 
