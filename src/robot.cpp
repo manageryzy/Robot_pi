@@ -487,6 +487,7 @@ int main(int argc, char** argv )
 			{
 				#ifdef __DEBUG_STEP__
 					puts("new action group");
+					printf("line k: %f",lineK);
 				#endif
 				if(captureFinished)
 				{
@@ -546,11 +547,10 @@ int main(int argc, char** argv )
 						actionQueue.push(ACTION_STAND_TO_RIGHT);
 						actionQueue.push(ACTION_WALK_LEFT);
 					}
-					else if(line1>=MaxLine1||/**/lineK<-0.3)//左转
+					else if(line1>=MaxLine1||/**/lineK<-0.2)//左转
 					{
 						#ifdef __DEBUG_STEP__
 							puts("--------:turn left------------------");
-							printf("line k: %f",lineK);
 							if(line1<MinLine1)
 							{
 								puts("line1>=MaxLine1||");
@@ -579,11 +579,10 @@ int main(int argc, char** argv )
 						}
 						actionQueue.push(ACTION_TURN_LEFT);
 					}
-					else if(/*line1<MinLine1||*/lineK>0.3)//右转
+					else if(/*line1<MinLine1||*/lineK>0.2)//右转
 					{
 						#ifdef __DEBUG_STEP__
 							puts("--------:turn right-----------------");
-							printf("line k: %f",lineK);
 							if(line1>=MaxLine1)
 							{
 								puts("line1<MinLine1");
