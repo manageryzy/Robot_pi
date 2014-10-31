@@ -276,6 +276,10 @@ int main(int argc, char** argv )
 	CvSeq* lines = 0;
 	CvMemStorage* storage = cvCreateMemStorage(0);
 
+	#ifdef __DEBUG_IMG_PROC_CALL__
+		long newTime=clock(),oldTime=clock();
+	#endif
+
 	if(init()!=0)
 		exit(-1);
 
@@ -294,6 +298,13 @@ int main(int argc, char** argv )
 		{
 			shouldCaptule = false;
 
+			#ifdef __DEBUG_IMG_PROC_CALL__
+				puts("__PROC_ALL_CAPTURE_START__");
+				oldTime = newTime;
+				newTime = clock();
+				printf("time used: %d \n",newTime-oldTime);
+			#endif
+
 			#ifdef CAPTURE_FROM_WEBCAM
 				img_raw = myCaptureImage();
 			#else
@@ -301,8 +312,22 @@ int main(int argc, char** argv )
 				img_raw = cvLoadImage(ImageFileName.c_str(),-1);
 			#endif
 
+			#ifdef __DEBUG_IMG_PROC_CALL__
+				puts("__PROC_CAPTURE__");
+				oldTime = newTime;
+				newTime = clock();
+				printf("time used: %d \n",newTime-oldTime);
+			#endif
+
 			img = cvCreateImage(cvSize(cvGetSize(img_raw).width/4,cvGetSize(img_raw).height/4),img_raw->depth,3);
 			cvResize(img_raw,img);
+
+			#ifdef __DEBUG_IMG_PROC_CALL__
+				puts("__PROC_CAPTURE__");
+				oldTime = newTime;
+				newTime = clock();
+				printf("time used: %d \n",newTime-oldTime);
+			#endif
 
 			#ifdef __DEBUG_IMG_PROC__
 				puts("pic captured!");
@@ -320,12 +345,18 @@ int main(int argc, char** argv )
 				img_gray=cvCreateImage(cvGetSize(img),img->depth,1);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("img_gray=cvCreateImage(cvGetSize(img),img->depth,1);");
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
 				#endif
 
 				//色彩空间转换
 				cvCvtColor(img,img_gray,CV_RGB2GRAY);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("cvCvtColor(img,img_gray,CV_RGB2GRAY);");
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
 				#endif
 			}
 
@@ -336,12 +367,18 @@ int main(int argc, char** argv )
 				img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("img_smooth=cvCreateImage(cvGetSize(img),img->depth,1);");
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
 				#endif
 
 				//进行平滑滤波
 				cvSmooth(img_gray,img_smooth,CV_GAUSSIAN,ImageFilterSize,0,0,0);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("cvSmooth(img_gray,img_smooth);");
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
 				#endif
 			}
 
@@ -352,6 +389,9 @@ int main(int argc, char** argv )
 				img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);");
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
 				#endif
 
 				int autoOstu ;
@@ -382,6 +422,9 @@ int main(int argc, char** argv )
 				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					printf("cvThreshold(img_smooth,img_twovalue,%d,150,CV_THRESH_BINARY);\n",autoOstu);
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
 				#endif
 
 				//自带的自适应二值化方法，由于效果不好，放弃
@@ -398,12 +441,18 @@ int main(int argc, char** argv )
 				img_canny = cvCreateImage(cvGetSize(img),img->depth,1);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("img_canny =cvCreateImage(cvGetSize(img),img->depth,1);");
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
 				#endif
 
 				//进行变换
 				cvCanny(img_gray,img_canny,30,50,3);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					puts("cvCanny(img_gray,img_canny,30,50,3);");
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
 				#endif
 			}
 
@@ -412,10 +461,24 @@ int main(int argc, char** argv )
 				line1 = 1024;
 				line1 = findBlackLine(img_twovalue,img_canny,img,Line1X,LineFindingError);
 				cvCircle(img,cvPoint(Line1X,line1),10,cvScalar(255,0,0,0.5));
+				#ifdef __DEBUG_IMG_PROC_CALL__
+					puts("__PROC_FIND_BLACK_LINE__");
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
+				#endif
 			}
 
 			lines = cvHoughLines2( img_canny, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 50, 50, 10 );
 			lineK = 0;
+
+			#ifdef __DEBUG_IMG_PROC_CALL__
+				puts("__PROC_HOUGH_LINE_");
+				oldTime = newTime;
+				newTime = clock();
+				printf("time used: %d \n",newTime-oldTime);
+			#endif
+
 			for(int i = 0; i < lines->total; i++ )
 			{
 				CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
@@ -436,6 +499,13 @@ int main(int argc, char** argv )
 				}
 			}
 
+			#ifdef __DEBUG_IMG_PROC_CALL__
+				puts("__PROC__LINES__");
+				oldTime = newTime;
+				newTime = clock();
+				printf("time used: %d \n",newTime-oldTime);
+			#endif
+
 			isWhiteScreen = false;
 			tooClose = false;
 			float per = (float)4*isTooClose(img_gray,Line1X)/(img->height*img->width);
@@ -445,11 +515,25 @@ int main(int argc, char** argv )
 				printf("per1:%f ",per);
 			#endif
 
+			#ifdef __DEBUG_IMG_PROC_CALL__
+				puts("__PROC_WHITE_SCREEN__");
+				oldTime = newTime;
+				newTime = clock();
+				printf("time used: %d \n",newTime-oldTime);
+			#endif
+
 			per = (float)isTooCloseB(img_twovalue)/(img->width);
 			if(per<0.6)tooClose = true;
 
 			#ifdef __DEBUG_IMG_PROC__
 				printf("per2:%f\n",per);
+			#endif
+
+			#ifdef __DEBUG_IMG_PROC_CALL__
+				puts("__PROC_TOO_CLOSE__");
+				oldTime = newTime;
+				newTime = clock();
+				printf("time used: %d \n",newTime-oldTime);
 			#endif
 
 			//-----------------------------
@@ -458,6 +542,11 @@ int main(int argc, char** argv )
 				puts("show captured!");
 				cvShowImage ("capture", img);
 				cvShowImage ("two", img_twovalue);
+				#ifdef __DEBUG_IMG_PROC_CALL__
+					oldTime = newTime;
+					newTime = clock();
+					printf("time used: %d \n",newTime-oldTime);
+				#endif
 			#endif
 
 			//-----------------------------
@@ -470,6 +559,13 @@ int main(int argc, char** argv )
 			cvReleaseImage(&img_canny);
 
 			captureFinished = true;
+
+			#ifdef __DEBUG_IMG_PROC_CALL__
+				puts("__PROC_CAPTURE_ALL_FINISH__");
+				oldTime = newTime;
+				newTime = clock();
+				printf("time used: %d \n",newTime-oldTime);
+			#endif
 		}
 
 		//延迟10ms
