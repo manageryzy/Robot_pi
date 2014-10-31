@@ -253,7 +253,7 @@ int otsu(const IplImage *src_image) //大津法求阈值
     //计算每个灰度级的像素数目占整幅图像的比例
     for(int i = 0; i < 256; i++)
     {
-    pixel_pro[i] = (float)pixel_count[i] / ( src_image->height * src_image->width );
+    	pixel_pro[i] = (float)pixel_count[i] / ( src_image->height * src_image->width );
     }
     //遍历灰度级[0,255],寻找合适的threshold
     for(int i = 0; i < 256; i++)
@@ -350,7 +350,7 @@ const int findBlackLine(const IplImage *twoValue,const IplImage *sobel,IplImage 
 }
 
 
-bool isToolClose(const IplImage *twoValue,int lineX)
+int isTooClose(const IplImage *twoValue,int lineX)
 {
 	int whiteCount=0;
 
@@ -359,11 +359,11 @@ bool isToolClose(const IplImage *twoValue,int lineX)
 	for(int i = 0; i < twoValue->height; i++)
 	{
 		uchar twoValuePix = dataTwoValu[i * twoValue->width + lineX];
-		if(twoValuePix!=0)
+		if(twoValuePix>50)
 			whiteCount++;
 	}
-	if(whiteCount/twoValue->height<0.4)
-		return true;
-	else
-		return false;
+
+	return whiteCount;
 }
+
+

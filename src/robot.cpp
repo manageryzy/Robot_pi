@@ -354,30 +354,31 @@ int main(int argc, char** argv )
 					puts("img_twovalue = cvCreateImage(cvGetSize(img),img->depth,1);");
 				#endif
 
-				int autoOstu = otsu(img_gray);
-				#ifdef __DEBUG_IMG_PROC_CALL__
-					puts("int autoOstu = otsu(img_gray);");
-				#endif
-
-				#ifdef __DEBUG_IMG_PROC__
-					printf("ostu = %d\n",autoOstu);
-				#endif
+				int autoOstu ;
+//				autoOstu = otsu(img_gray);
+//				#ifdef __DEBUG_IMG_PROC_CALL__
+//					puts("int autoOstu = otsu(img_gray);");
+//				#endif
+//
+//				#ifdef __DEBUG_IMG_PROC__
+//					printf("ostu = %d\n",autoOstu);
+//				#endif
 
 				autoOstu = 90;
 
-				if(autoOstu > 110)
-				{
-					#ifdef __DEBUG_IMG_PROC__
-						puts("pure white!");
-					#endif
-
-					isWhiteScreen = true;
-					autoOstu = 70;
-				}
-				else
-				{
-					isWhiteScreen = false;
-				}
+//				if(autoOstu > 110)
+//				{
+//					#ifdef __DEBUG_IMG_PROC__
+//						puts("pure white!");
+//					#endif
+//
+//					isWhiteScreen = true;
+//					autoOstu = 70;
+//				}
+//				else
+//				{
+//					isWhiteScreen = false;
+//				}
 				cvThreshold(img_smooth,img_twovalue,autoOstu,150,CV_THRESH_BINARY);
 				#ifdef __DEBUG_IMG_PROC_CALL__
 					printf("cvThreshold(img_smooth,img_twovalue,%d,150,CV_THRESH_BINARY);\n",autoOstu);
@@ -435,8 +436,14 @@ int main(int argc, char** argv )
 				}
 			}
 
-			tooClose = isToolClose(img,Line1X);
-
+			isWhiteScreen = false;
+			tooClose = false;
+			float per = (float)isTooClose(img_twovalue,Line1X)/img->height;
+			if(per>0.95)isWhiteScreen = true;
+			if(per<0.3)tooClose = true;
+			#ifdef __DEBUG_IMG_PROC__
+				printf("per:%f \n",per);
+			#endif
 			//-----------------------------
 			//显示图像
 			#ifdef SHOW_GUI
