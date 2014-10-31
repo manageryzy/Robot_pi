@@ -219,7 +219,7 @@ int init()
 	//opencv初始化
 
 	//开启opencv串口线程，防止在多线程的时候出来各种各样的诡异的异常
-	cvStartWindowThread();
+	//cvStartWindowThread();
 
 	//初始化opencv捕获
 	if(opencvCaptureInit())

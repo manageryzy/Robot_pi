@@ -15,7 +15,7 @@
 	#define __INCLUDED__
 
 	//下面的是一些开关
-	#define __DEBUG__
+	//#define __DEBUG__
 	#ifdef __DEBUG__
 		#define SHOW_GUI
 		//#define __DEBUG_SERIAL__
